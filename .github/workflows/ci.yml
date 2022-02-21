@@ -1,0 +1,119 @@
+name: Git Sync Perforce
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches: [ main ]
+
+# When pushing in main or merging pull request in main
+#  ${{github.base_ref}} : <empty>
+#  ${{github.ref_name}} : main
+# When creating pull request in dev*
+#  ${{github.base_ref}} : main
+#  ${{github.ref_name}} : 1/merge
+
+jobs:
+
+  build:
+    runs-on: [common,linux64]
+    container: 
+      image: fr-qafactorydev.europe.altair.com/common-linux64
+      credentials: 
+        username: ${{secrets.DOCKER_REGISTRY_USER}}
+        password: ${{secrets.DOCKER_REGISTRY_PASSWD}}
+      volumes: 
+        - /etc/localtime:/etc/localtime:ro
+
+    steps:
+    
+    # Set the working dir suffixed with branch name
+    - uses: haya14busa/action-cond@v1
+      id: condval
+      with:
+        cond: ${{ github.base_ref == '' }}
+        if_true: ${{github.ref_name}}
+        if_false: ${{github.base_ref}}
+    - name: Use conditional value
+      run: |
+        echo "working-directory=${{ steps.condval.outputs.value }}" >> $GITHUB_ENV
+        ls -l $GITHUB_ENV
+        cat $GITHUB_ENV    
+
+    - name: Create/Update perforce directory
+      run: |
+        mkdir -p perforce_git_sync
+        cd perforce_git_sync
+        ! test -f p4config && echo "AA" >> p4config
+
+
+
+    # # Get last git modifications, don't clean before (way to keep persistent data)
+    # - uses: actions/checkout@v2
+    #   with:
+    #     path: ${{env.working-directory}}
+    #     clean: 'false'
+
+#     - name: Build binaries 1
+#       working-directory: ${{env.working-directory}}
+#       run: |
+#         pwd
+#         export mydate=`date`
+#         echo >> check_cache.txt
+#         echo "Starting ${{ matrix.build_number }} at $mydate" >> check_cache.txt
+#         sleep 5
+#         export mydate=`date`
+#         echo "Ending ${{ matrix.build_number }} at $mydate" >> check_cache.txt
+#         echo >> check_cache.txt
+#         make ext=_${{ matrix.build_number }}-${{github.run_number}}
+# #        source /opt/intel/oneapi/setvars.sh
+# #        source /opt/rh/devtoolset-8/enable
+# #        mpirun -version
+# #        gcc -v
+# #        ifort -v
+# #        make
+# #        echo "CACHE_KEY : $GITHUB_REF_NAME - $RUNNER_ARCH"
+
+#     - name: Check binaries
+#       working-directory: ${{env.working-directory}}
+#       run: |
+#         pwd
+#         ls -l exec/
+
+  # qa:
+
+  #   needs: build
+  #   runs-on: [smoketest,linux64]
+  #   container: 
+  #     image: fr-qafactorydev.europe.altair.com/qa-linux64:mpi-last
+  #     credentials: 
+  #       username: ${{secrets.DOCKER_REGISTRY_USER}}
+  #       password: ${{secrets.DOCKER_REGISTRY_PASSWD}}
+  #     volumes: 
+  #       - /etc/localtime:/etc/localtime:ro
+
+  #   strategy:
+  #     matrix:
+  #       include:
+  #         - build_number: build1
+  #         - build_number: build2
+  #         - build_number: build3
+  #         - build_number: build4
+  #     fail-fast: false
+  #   steps:
+
+  #   # Get last git modifications, don't clean before (way to keep persistent obj files)
+  #   - uses: actions/checkout@v2
+  #     with:
+  #       path: ${{env.working-directory}}
+
+  #   - uses: actions/download-artifact@v2
+  #     with:
+  #       name: mybins
+  #       path: myexe
+
+  #   - name: Check Env
+  #     run: |
+  #       pwd
+  #       ls -l myexe/*_${{ matrix.build_number }}*
