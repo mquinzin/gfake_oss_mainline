@@ -16,7 +16,7 @@ on:
 
 jobs:
 
-  build:
+  sync:
     runs-on: [common,linux64]
     container: 
       image: fr-qafactorydev.europe.altair.com/common-linux64
@@ -43,8 +43,6 @@ jobs:
 
     - name: Create/Update perforce directory
       run: |
-        mkdir -p perforce_git_sync
-        cd perforce_git_sync
         ! test -f p4config && echo "AA" >> p4config
 
 
