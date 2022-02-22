@@ -52,15 +52,15 @@ jobs:
         # Test writing several lines in a file => put client content here
         if ! p4 client -o -t $perforce_ws_name > /dev/null 2>&1; then 
           echo "
-          Client: $perforce_ws_name
-          Owner:  servbot
-          Root:   $PWD
-          Options:        noallwrite noclobber nocompress unlocked nomodtime normdir
-          SubmitOptions:  submitunchanged
-          LineEnd:        local
-          View:
-          //depot/Radioss/pfake_oss_mainline/... //$perforce_ws_name/...
-          -//depot/Radioss/pfake_oss_mainline/.git/... //$perforce_ws_name/.git/...
+        Client: $perforce_ws_name
+        Owner:  servbot
+        Root:   $PWD
+        Options:        noallwrite noclobber nocompress unlocked nomodtime normdir
+        SubmitOptions:  submitunchanged
+        LineEnd:        local
+        View:
+        //depot/Radioss/pfake_oss_mainline/... //$perforce_ws_name/...
+        -//depot/Radioss/pfake_oss_mainline/.git/... //$perforce_ws_name/.git/...
           " > myfile;
         else  echo "Already existing"
         fi
