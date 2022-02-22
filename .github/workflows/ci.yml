@@ -61,7 +61,7 @@ jobs:
         View:
         //depot/Radioss/pfake_oss_mainline/... //$perforce_ws_name/...
         -//depot/Radioss/pfake_oss_mainline/.git/... //$perforce_ws_name/.git/...
-          " > myfile;
+          " | p4 client -i;
         else  echo "Already existing"
         fi
         cat myfile
