@@ -17,6 +17,10 @@ on:
 jobs:
 
   sync:
+
+    env:
+      perforce_ws_name: servbot_commoncontainer_sync_git_perforce
+
     runs-on: [common,linux64]
     container: 
       image: fr-qafactorydev.europe.altair.com/common-linux64
@@ -45,19 +49,21 @@ jobs:
     - name: Create/Update perforce directory
       working-directory: ${{env.working-directory}}
       run: |
-        pwd
         # Test writing several lines in a file => put client content here
-        echo "
-        Client: servbot_commoncontainer_sync_git_perforce
-        Owner:  servbot
-        Root:   $PWD
-        Options:        noallwrite noclobber nocompress unlocked nomodtime normdir
-        SubmitOptions:  submitunchanged
-        LineEnd:        local
-        View:
-        //depot/Radioss/pfake_oss_mainline/... //servbot_commoncontainer_sync_git_perforce/...
-        -//depot/Radioss/pfake_oss_mainline/.git/... //servbot_commoncontainer_sync_git_perforce/.git/...
-        " > myfile
+        if ! p4 client -o -t $perforce_ws_name > /dev/null 2>&1; then 
+          echo "
+          Client: $perforce_ws_name
+          Owner:  servbot
+          Root:   $PWD
+          Options:        noallwrite noclobber nocompress unlocked nomodtime normdir
+          SubmitOptions:  submitunchanged
+          LineEnd:        local
+          View:
+          //depot/Radioss/pfake_oss_mainline/... //$perforce_ws_name/...
+          -//depot/Radioss/pfake_oss_mainline/.git/... //$perforce_ws_name/.git/...
+          " > myfile;
+        else  echo "Already existing"
+        fi
         cat myfile
         #if ! p4 client -o -t servbot_testws > /dev/null 2>&1; then echo "Creating WS"; cat mytemplate | p4 client -i ; else echo "Already existing"; fi
 
