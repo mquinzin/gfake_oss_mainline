@@ -38,6 +38,7 @@ jobs:
     - name: Use conditional value
       run: |
         echo "working-directory=${{ steps.condval.outputs.value }}" >> $GITHUB_ENV
+        mkdir -p ${{env.working-directory}}
 
     - name: Create/Update perforce directory
       working-directory: ${{env.working-directory}}
