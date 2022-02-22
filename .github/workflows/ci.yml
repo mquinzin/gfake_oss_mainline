@@ -48,6 +48,8 @@ jobs:
         pwd
         echo "My pwd is ${{env.working-directory}}"
         echo "Github WS is ${{github.workspace}}"
+        ls -l 
+        ls -l ${{github.workspace}}/${{env.working-directory}}
         # Test writing several lines in a file => put client content here
         echo "
         Client: servbot_commoncontainer_sync_git_perforce
