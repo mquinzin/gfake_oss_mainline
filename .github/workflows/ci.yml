@@ -53,7 +53,6 @@ jobs:
       working-directory: ${{env.working-directory}}
       run: |
         echo $P4PASSWD | p4 login
-        p4 info
         if ! p4 client -o -t $P4CLIENT > /dev/null 2>&1; then 
           echo "Creating workspace $P4CLIENT (1st time run ?)"
           echo "
@@ -70,6 +69,18 @@ jobs:
         fi
         p4 sync
 
+    # Get last git modifications, don't clean before
+    - uses: actions/checkout@v2
+      with:
+        path: ${{env.working-directory}}
+        clean: 'false'
+
+    - name: Check files
+      working-directory: ${{env.working-directory}}
+      run: |
+        p4 status
+        git status
+        ls -al
 
     # # Get last git modifications, don't clean before (way to keep persistent data)
     # - uses: actions/checkout@v2
