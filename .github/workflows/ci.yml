@@ -49,7 +49,8 @@ jobs:
     - name: Create/Update perforce directory
       working-directory: ${{env.working-directory}}
       run: |
-        # Test writing several lines in a file => put client content here
+        echo $P4PASSWD | p4 login
+        p4 info
         if ! p4 client -o -t $perforce_ws_name > /dev/null 2>&1; then 
           echo "
         Client: $perforce_ws_name
@@ -64,9 +65,6 @@ jobs:
           " | p4 client -i;
         else  echo "Already existing"
         fi
-        cat myfile
-        #if ! p4 client -o -t servbot_testws > /dev/null 2>&1; then echo "Creating WS"; cat mytemplate | p4 client -i ; else echo "Already existing"; fi
-
 
 
     # # Get last git modifications, don't clean before (way to keep persistent data)
