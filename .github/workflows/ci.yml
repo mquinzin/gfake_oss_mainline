@@ -43,7 +43,20 @@ jobs:
 
     - name: Create/Update perforce directory
       run: |
-        ! test -f p4config && echo "AA" >> p4config
+        # Test writing several lines in a file => put client content here
+        echo "
+Client: servbot_commoncontainer_sync_git_perforce
+Owner:  servbot
+Root:   /__w/gfa/pfake_oss_mainline/test
+Options:        noallwrite noclobber nocompress unlocked nomodtime normdir
+SubmitOptions:  submitunchanged
+LineEnd:        local
+View:
+//depot/Radioss/pfake_oss_mainline/... //servbot_commoncontainer_sync_git_perforce/...
+-//depot/Radioss/pfake_oss_mainline/.git/... //servbot_commoncontainer_sync_git_perforce/.git/...
+        " >> myfile
+        cat myfile
+        #if ! p4 client -o -t servbot_testws > /dev/null 2>&1; then echo "Creating WS"; cat mytemplate | p4 client -i ; else echo "Already existing"; fi
 
 
 
