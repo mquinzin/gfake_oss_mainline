@@ -22,7 +22,7 @@ jobs:
       perforce_ws_name: servbot_commoncontainer_sync_git_perforce
       P4PORT: ${{secrets.P4PORT}}
       P4USER: ${{secrets.P4USER}}
-      P4PASSWD: ${{secrets.$P4PASSWD}}
+      P4PASSWD: ${{secrets.P4PASSWD}}
 
     runs-on: [common,linux64]
     container: 
