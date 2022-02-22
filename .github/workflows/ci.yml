@@ -38,11 +38,12 @@ jobs:
     - name: Use conditional value
       run: |
         echo "working-directory=${{ steps.condval.outputs.value }}" >> $GITHUB_ENV
-        ls -l $GITHUB_ENV
-        cat $GITHUB_ENV    
 
     - name: Create/Update perforce directory
+      working-directory: ${{env.working-directory}}
       run: |
+        pwd
+        echo "My pwd is ${{env.working-directory}}"
         # Test writing several lines in a file => put client content here
         echo "
         Client: servbot_commoncontainer_sync_git_perforce
