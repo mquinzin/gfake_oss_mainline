@@ -82,8 +82,7 @@ jobs:
       working-directory: ${{env.working-directory}}
       run: |
         p4 status
-        git status
-        ls -al
+        p4 reconcile
 
     # # Get last git modifications, don't clean before (way to keep persistent data)
     # - uses: actions/checkout@v2
