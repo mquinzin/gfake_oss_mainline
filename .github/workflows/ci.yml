@@ -67,16 +67,16 @@ jobs:
           //depot/Radioss/pfake_oss_mainline/... //$P4CLIENT/...
           -//depot/Radioss/pfake_oss_mainline/.git/... //$P4CLIENT/.git/...
           -//depot/Radioss/pfake_oss_mainline/.github/... //$P4CLIENT/.github/...
-          -//depot/Radioss/pfake_oss_mainline/C/... //$P4CLIENT/...
+          -//depot/Radioss/pfake_oss_mainline/C/... //$P4CLIENT/C/...
           " | p4 client -i;
         fi
         p4 sync
 
-    # Get last git modifications, don't clean before
-    # - uses: actions/checkout@v2
-    #   with:
-    #     path: ${{env.working-directory}}
-    #     clean: 'false'
+    Get last git modifications, don't clean before
+    - uses: actions/checkout@v2
+      with:
+        path: ${{env.working-directory}}
+        clean: 'false'
 
     - name: Check files
       working-directory: ${{env.working-directory}}
