@@ -72,7 +72,7 @@ jobs:
         fi
         p4 sync
 
-    Get last git modifications, don't clean before
+    # Get last git modifications, don't clean before
     - uses: actions/checkout@v2
       with:
         path: ${{env.working-directory}}
