@@ -7,7 +7,7 @@ on:
   pull_request:
     branches: [ main ]
 
-# When pushing in main or merging pull request in main 
+# When pushing in main or merging pull request in main
 #  ${{github.base_ref}} : <empty>
 #  ${{github.ref_name}} : main
 # When creating pull request in dev*
