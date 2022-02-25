@@ -1,9 +1,7 @@
 name: Git Sync Perforce
 
 on:
-  push:
-    branches:
-      - main
+
   pull_request:
     branches: [ main ]
 
@@ -26,7 +24,7 @@ jobs:
     steps:
 
       - name: Print PR number
-        run: echo "PR number is ${{github.event.number}}"
+        run: echo "PR number is ${{github.event.number}} GG"
 
       - name: Logging
         run: |
