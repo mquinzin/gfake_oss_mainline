@@ -16,10 +16,18 @@ on:
 
 jobs:
 
+
+
   log-github-event-goodies:
+
+
     name: "LOG Everything on GitHub Event"
     runs-on: ubuntu-latest 
     steps:
+
+      - name: Print PR number
+        run: echo "PR number is ${{github.event.number}}"
+
       - name: Logging
         run: |
           echo "${{toJSON(github.event)}}"
