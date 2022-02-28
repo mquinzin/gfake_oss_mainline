@@ -29,13 +29,13 @@ jobs:
          
      steps:
       - uses: octokit/request-action@v2.x
-          id: pr_get_info
-          with:
-            route: GET /repos/mquinzin/gfake_oss_mainline/pulls/9
-            owner: octokit
-            repo: request-action
-          env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        id: pr_get_info
+        with:
+          route: GET /repos/mquinzin/gfake_oss_mainline/pulls/9
+          owner: octokit
+          repo: request-action
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: "Check title"
         run: |
