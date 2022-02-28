@@ -7,7 +7,7 @@ on:
       - main
 
   # pull_request:
-  #   branches: [ main ]
+  #   branches: [ main ] 
 
 # When pushing in main or merging pull request in main
 #  ${{github.base_ref}} : <empty>
