@@ -31,7 +31,7 @@ jobs:
       - uses: octokit/request-action@v2.x
         id: pr_get_info
         with:
-          route: GET /repos/mquinzin/gfake_oss_mainline/pulls/90
+          route: GET /repos/mquinzin/gfake_oss_mainline/pulls/9
           owner: octokit
           repo: request-action
         env:
