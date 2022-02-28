@@ -18,8 +18,13 @@ on:
 
 jobs:
   getPRInfos:
-    runs-on: ubuntu-latest
-    steps:
+     container: 
+       image: fr-qafactorydev.europe.altair.com/common-linux64
+       credentials: 
+         username: ${{secrets.DOCKER_REGISTRY_USER}}
+         password: ${{secrets.DOCKER_REGISTRY_PASSWD}}
+       volumes: 
+         - /etc/localtime:/etc/localtime:ro    steps:
       - uses: octokit/request-action@v2.x
         id: pr_get_info
         with:
