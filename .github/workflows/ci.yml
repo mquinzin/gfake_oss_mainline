@@ -32,8 +32,7 @@ jobs:
       - uses: octokit/request-action@v2.x
         id: pr_get_info
         with:
-          route: GET /repos/${{ github.repository }}/pulls/8
-          # route: GET /repos/${{ github.repository }}/pulls/${{github.event.number}}
+          route: GET /repos/${{ github.repository }}/pulls/${{github.event.number}}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
