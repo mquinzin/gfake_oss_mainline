@@ -20,11 +20,10 @@ jobs:
   getPRInfos:
      runs-on: [common,linux64]
      container: 
-       image: common-linux64-withcurl
-#       image: fr-qafactorydev.europe.altair.com/common-linux64
-#       credentials: 
-#         username: ${{secrets.DOCKER_REGISTRY_USER}}
-#         password: ${{secrets.DOCKER_REGISTRY_PASSWD}}
+       image: fr-qafactorydev.europe.altair.com/common-linux64:curl
+       credentials: 
+         username: ${{secrets.DOCKER_REGISTRY_USER}}
+         password: ${{secrets.DOCKER_REGISTRY_PASSWD}}
        volumes: 
          - /etc/localtime:/etc/localtime:ro    
          
