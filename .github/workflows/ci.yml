@@ -31,7 +31,7 @@ jobs:
       - uses: octokit/request-action@v2.x
         id: pr_get_info
         with:
-          route: GET /repos/mquinzin/gfake_oss_mainline/pulls/9
+          route: GET /repos/mquinzin/gfake_oss_mainline/pulls/90
           owner: octokit
           repo: request-action
         env:
@@ -39,7 +39,7 @@ jobs:
 
       - name: "Check title"
         run: |
-          echo "TITLE is ${{ fromJSON(steps.pr_get_info.outputs.data).titlexx }}"
+          echo "TITLE is ${{ fromJSON(steps.pr_get_info.outputs.data).title }}"
 
       - name: "Check failure"
         run: echo "Informations in Pull Request json data could not be found. Request failed with status ${{ steps.pr_get_info.outputs.status }}"
