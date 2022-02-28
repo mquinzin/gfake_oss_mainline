@@ -19,16 +19,16 @@ on:
 jobs:
 
   getPRInfos:
-     runs-on: [common,linux64]
-     container: 
-       image: fr-qafactorydev.europe.altair.com/common-linux64:2.0
-       credentials: 
-         username: ${{secrets.DOCKER_REGISTRY_USER}}
-         password: ${{secrets.DOCKER_REGISTRY_PASSWD}}
-       volumes: 
+    runs-on: [common,linux64]
+    container: 
+      image: fr-qafactorydev.europe.altair.com/common-linux64:2.0
+      credentials: 
+        username: ${{secrets.DOCKER_REGISTRY_USER}}
+        password: ${{secrets.DOCKER_REGISTRY_PASSWD}}
+      volumes: 
          - /etc/localtime:/etc/localtime:ro    
          
-     steps:
+    steps:
       - uses: octokit/request-action@v2.x
         id: pr_get_info
         with:
@@ -43,15 +43,19 @@ jobs:
         run: |
           echo "PR is ${{ fromJSON(steps.pr_get_info.outputs.data).title }} #${{ fromJSON(steps.pr_get_info.outputs.data).number }}"
           echo "MERGE COMMIT is ${{ fromJSON(steps.pr_get_info.outputs.data).merge_commit_sha }}"
-          echo "::set-ouput name=p4_description::\"GIT Pull Request #${{github.event.number}} (${{ fromJSON(steps.pr_get_info.outputs.data).merge_commit_sha }}): ${{ fromJSON(steps.pr_get_info.outputs.data).title }}\""
 
       - name: "Check failure"
         run: echo "Informations in Pull Request json data could not be found. Request failed with status ${{ steps.pr_get_info.outputs.status }}"
         if: ${{ failure() }}
 
 
+    outputs:
+      p4_description: "GIT Pull Request #${{github.event.number}} (${{ fromJSON(steps.pr_get_info.outputs.data).merge_commit_sha }}): ${{ fromJSON(steps.pr_get_info.outputs.data).title }}"
+
 
   sync:
+
+    needs: getPRInfos
 
     env:
       P4PORT: ${{secrets.P4PORT}}
@@ -71,7 +75,7 @@ jobs:
     steps:
     
       - name: Check description
-        run: echo "P4 DESCRIPTION is ${{ steps.pr_get_info.outputs.p4_description }}"
+        run: echo "P4 DESCRIPTION is ${{ needs.getPRInfos.outputs.p4_description }}"
 
   #   # Set the working dir suffixed with branch name
   #   - uses: haya14busa/action-cond@v1
