@@ -18,21 +18,29 @@ on:
 
 jobs:
 
+  runs-on: ubuntu-latest
+  steps:
+    - uses: octokit/request-action@v2.x
+      id: pr_get_info
+      with:
+        route: GET /repos/mquinzin/gfake_oss_mainline/pulls/8
+        owner: octokit
+        repo: request-action
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - run: "echo latest release: ${{ steps.pr_get_info.outputs.data }}"
 
-
-  log-github-event-goodies:
-
-
-    name: "LOG Everything on GitHub Event"
-    runs-on: ubuntu-latest 
-    steps:
-
-      - name: Print PR number
-        run: echo "PR number is ${{github.event.number}} GG"
-
-      - name: Logging
-        run: |
-          echo "${{toJSON(github.event)}}"
+#  log-github-event-goodies:
+#    name: "LOG Everything on GitHub Event"
+#    runs-on: ubuntu-latest 
+#    steps:
+#
+#      - name: Print PR number
+#        run: echo "PR number is ${{github.event.number}} GG"
+#
+#      - name: Logging
+#        run: |
+#          echo "${{toJSON(github.event)}}"
 
 
   # sync:
