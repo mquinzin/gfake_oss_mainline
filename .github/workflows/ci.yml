@@ -38,7 +38,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: "Check title"
         run: |
-          export pr_title=`echo ${{ steps.pr_get_info.outputs.data }} | jq '.title'`
+          export pr_title=`echo '${{ steps.pr_get_info.outputs.data }}' | jq '.title'`
           echo "TITLE is $pr_title_echo"
 
 #  log-github-event-goodies:
