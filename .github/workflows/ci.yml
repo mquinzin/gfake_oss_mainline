@@ -2,8 +2,12 @@ name: Git Sync Perforce
 
 on:
 
-  pull_request:
-    branches: [ main ]
+  push:
+    branches:
+      - main
+
+  # pull_request:
+  #   branches: [ main ] 
 
 # When pushing in main or merging pull request in main
 #  ${{github.base_ref}} : <empty>
