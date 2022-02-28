@@ -28,8 +28,7 @@ jobs:
          - /etc/localtime:/etc/localtime:ro    
          
      steps:
-      - name: "Get Pull Requestion information from data json (REST API)" 
-        uses: octokit/request-action@v2.x
+      - uses: octokit/request-action@v2.x
           id: pr_get_info
           with:
             route: GET /repos/mquinzin/gfake_oss_mainline/pulls/9
