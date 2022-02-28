@@ -43,7 +43,7 @@ jobs:
         run: |
           echo "PR is ${{ fromJSON(steps.pr_get_info.outputs.data).title }} #${{ fromJSON(steps.pr_get_info.outputs.data).number }}"
           echo "MERGE COMMIT is ${{ fromJSON(steps.pr_get_info.outputs.data).merge_commit_sha }}"
-          echo "p4_description=\"GIT Pull Request #${{github.event.number}} (${{ fromJSON(steps.pr_get_info.outputs.data).merge_commit_sha }}): ${{ fromJSON(steps.pr_get_info.outputs.data).title }}\"" >> $GITHUB_ENV
+          echo "::set-ouput name=p4_description::\"GIT Pull Request #${{github.event.number}} (${{ fromJSON(steps.pr_get_info.outputs.data).merge_commit_sha }}): ${{ fromJSON(steps.pr_get_info.outputs.data).title }}\""
 
       - name: "Check failure"
         run: echo "Informations in Pull Request json data could not be found. Request failed with status ${{ steps.pr_get_info.outputs.status }}"
@@ -71,7 +71,7 @@ jobs:
     steps:
     
       - name: Check description
-        run: echo "P4 DESCRIPTION is ${{ env.p4_description }}"
+        run: echo "P4 DESCRIPTION is ${{ steps.pr_get_info.outputs.p4_description }}"
 
   #   # Set the working dir suffixed with branch name
   #   - uses: haya14busa/action-cond@v1
