@@ -135,10 +135,15 @@ jobs:
 
       - name: Check files
         working-directory: ${{env.working-directory}}
+        id: reconcile
         run: |
           p4 status
           p4 reconcile
-          p4 opened
+          echo "::set-output name=opened_files::$(p4 opened | wc -l)"
+
+      - name: "Check opened files"
+        run: |
+          echo "opened_files : ${{ steps.reconcile.outputs.opened_files }}"          
 
       - name: Submit
         working-directory: ${{env.working-directory}}
