@@ -53,14 +53,12 @@ jobs:
       - name: "Check message"
         id: generate_commit_msg
         run: |
-          export COMMIT_MSG=$(echo "${{ fromJSON(steps.pr_get_info.outputs.data).commit.message }}" | sed 'H;1h;$!d;x; s/\n\n/\n/g')
           echo "Commit message is ${{ fromJSON(steps.pr_get_info.outputs.data).commit.message }}"
           echo "::set-output name=commit_msg1::$(echo "${{ fromJSON(steps.pr_get_info.outputs.data).commit.message }}" | sed 'H;1h;$!d;x; s/\n\n/\n/g')"
 
       - name: "Check failure"
         run: echo "Commit informations (${{github.sha}}) could not be found. Request failed with status ${{ steps.pr_get_info.outputs.status }}"
         if: ${{ failure() }}
-
 
     outputs:
       p4_description: "[ GIT INTEG ] (${{github.sha}}) - ${{ steps.generate_commit_msg.outputs.commit_msg1 }}"
@@ -92,54 +90,55 @@ jobs:
           echo "p4_description : ${{ needs.getPRInfos.outputs.p4_description }}"
 
 
-    # # Set the working dir suffixed with branch name
-    # - uses: haya14busa/action-cond@v1
-    #   id: condval
-    #   with:
-    #     cond: ${{ github.base_ref == '' }}
-    #     if_true: ${{github.ref_name}}
-    #     if_false: ${{github.base_ref}}
-    # - name: Use conditional value
-    #   run: |
-    #     echo "working-directory=${{ steps.condval.outputs.value }}" >> $GITHUB_ENV
+    # Set the working dir suffixed with branch name
+    - uses: haya14busa/action-cond@v1
+      id: condval
+      with:
+        cond: ${{ github.base_ref == '' }}
+        if_true: ${{github.ref_name}}
+        if_false: ${{github.base_ref}}
+    - name: Use conditional value
+      run: |
+        echo "working-directory=${{ steps.condval.outputs.value }}" >> $GITHUB_ENV
 
-    # - name: Create branch oriented WS directory
-    #   run: mkdir -p ${{env.working-directory}}
+    - name: Create branch oriented WS directory
+      run: mkdir -p ${{env.working-directory}}
 
-    # # Commercial files should not be present in this WS
-    # - name: Create/Update perforce directory
-    #   working-directory: ${{env.working-directory}}
-    #   run: |
-    #     echo $P4PASSWD | p4 login
-    #     if ! p4 client -o -t $P4CLIENT > /dev/null 2>&1; then 
-    #       echo "Creating workspace $P4CLIENT (1st time run ?)"
-    #       echo "
-    #     Client: $P4CLIENT
-    #     Owner:  servbot
-    #     Root:   $PWD
-    #     Options:        noallwrite noclobber nocompress unlocked nomodtime normdir
-    #     SubmitOptions:  submitunchanged
-    #     LineEnd:        local
-    #     View:
-    #       //depot/Radioss/pfake_oss_mainline/... //$P4CLIENT/...
-    #       -//depot/Radioss/pfake_oss_mainline/.git/... //$P4CLIENT/.git/...
-    #       -//depot/Radioss/pfake_oss_mainline/.github/... //$P4CLIENT/.github/...
-    #       -//depot/Radioss/pfake_oss_mainline/C/... //$P4CLIENT/C/...
-    #       " | p4 client -i;
-    #     fi
-    #     p4 sync
+    # Commercial files should not be present in this WS
+    - name: Create/Update perforce directory
+      working-directory: ${{env.working-directory}}
+      run: |
+        echo $P4PASSWD | p4 login
+        if ! p4 client -o -t $P4CLIENT > /dev/null 2>&1; then 
+          echo "Creating workspace $P4CLIENT (1st time run ?)"
+          echo "
+        Client: $P4CLIENT
+        Owner:  servbot
+        Root:   $PWD
+        Options:        noallwrite noclobber nocompress unlocked nomodtime normdir
+        SubmitOptions:  submitunchanged
+        LineEnd:        local
+        View:
+          //depot/Radioss/pfake_oss_mainline/... //$P4CLIENT/...
+          -//depot/Radioss/pfake_oss_mainline/.git/... //$P4CLIENT/.git/...
+          -//depot/Radioss/pfake_oss_mainline/.github/... //$P4CLIENT/.github/...
+          -//depot/Radioss/pfake_oss_mainline/C/... //$P4CLIENT/C/...
+          " | p4 client -i;
+        fi
+        p4 sync
 
-    # # Get last git modifications, don't clean before
-    # - uses: actions/checkout@v2
-    #   with:
-    #     path: ${{env.working-directory}}
-    #     clean: 'false'
+    # Get last git modifications, don't clean before
+    - uses: actions/checkout@v2
+      with:
+        path: ${{env.working-directory}}
+        clean: 'false'
 
-    # - name: Check files
-    #   working-directory: ${{env.working-directory}}
-    #   run: |
-    #     p4 status
-    #     p4 reconcile
+    - name: Check files
+      working-directory: ${{env.working-directory}}
+      run: |
+        p4 status
+        p4 reconcile
+        p4 opened
 
     # - name: Submit
     #   working-directory: ${{env.working-directory}}
