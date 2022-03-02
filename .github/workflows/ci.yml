@@ -50,19 +50,21 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # - name: "Build commit message"
-      #   id: generate_commit_msg
-      #   run: |
+      - name: "Build commit message"
+        id: generate_commit_msg
+        run: |
+          echo "::set-output name=p4_description::$(echo \"[ GIT INTEG ] (${{github.sha}}) - ${{ fromJSON(steps.pr_get_info.outputs.data).commit.message }}\" | sed 'H;1h;$!d;x; s/\n\n/\n/g'))"
       #     echo "Commit message is ${{ fromJSON(steps.pr_get_info.outputs.data).commit.message }}"
       #     echo "::set-output name=commit_msg::$(echo "${{ fromJSON(steps.pr_get_info.outputs.data).commit.message }}" | sed 'H;1h;$!d;x; s/\n\n/\n/g')"
+
 
       - name: "Check failure"
         run: echo "Commit informations (${{github.sha}}) could not be found. Request failed with status ${{ steps.pr_get_info.outputs.status }}"
         if: ${{ failure() }}
 
-    outputs:
-      # p4_description: "[ GIT INTEG ] (${{github.sha}}) - ${{ steps.generate_commit_msg.outputs.commit_msg }}"
-      p4_description: echo "[ GIT INTEG ] (${{github.sha}}) - ${{ fromJSON(steps.pr_get_info.outputs.data).commit.message }}" | sed 'H;1h;$!d;x; s/\n\n/\n/g')
+    # outputs:
+    #   # p4_description: "[ GIT INTEG ] (${{github.sha}}) - ${{ steps.generate_commit_msg.outputs.commit_msg }}"
+    #   p4_description: echo "[ GIT INTEG ] (${{github.sha}}) - ${{ fromJSON(steps.pr_get_info.outputs.data).commit.message }}" | sed 'H;1h;$!d;x; s/\n\n/\n/g')
 
 
   sync:
