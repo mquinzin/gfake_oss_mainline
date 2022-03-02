@@ -50,7 +50,7 @@ jobs:
 
       - name: "Check message"
         run: |
-          export COMMIT_MSG=$(echo "${{ fromJSON(steps.pr_get_info.outputs.data).commit.message }}" | sed -e "s/\n\n/A/g")
+          export COMMIT_MSG=$(echo "${{ fromJSON(steps.pr_get_info.outputs.data).commit.message }}" | sed 'H;1h;$!d;x; s/\n\n/ - /g')
           echo "Commit message is ${{ fromJSON(steps.pr_get_info.outputs.data).commit.message }}"
           echo "COMMIT_MSG : $COMMIT_MSG"
 
