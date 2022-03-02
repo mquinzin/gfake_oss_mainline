@@ -90,7 +90,7 @@ jobs:
 
       - name: "Check message"
         run: |
-          echo "p4_description : ${{ needs.getPRInfos.outputs.p4_description }}"
+          echo "p4_description : ${{ needs.getPRInfos.generate_commit_msg.outputs.p4_description }}"
 
 
       # Set the working dir suffixed with branch name
