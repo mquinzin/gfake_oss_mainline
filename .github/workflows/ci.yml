@@ -57,77 +57,77 @@ jobs:
       p4_description: "GIT Pull Request #${{github.event.number}} (${{ fromJSON(steps.pr_get_info.outputs.data).merge_commit_sha }}): ${{ fromJSON(steps.pr_get_info.outputs.data).title }}"
 
 
-  sync:
+  # sync:
 
-    needs: getPRInfos
+  #   needs: getPRInfos
 
-    env:
-      P4PORT: ${{secrets.P4PORT}}
-      P4USER: ${{secrets.P4USER}}
-      P4PASSWD: ${{secrets.P4PASSWD}}
-      P4CLIENT: servbot_commoncontainer_sync_git_perforce
+  #   env:
+  #     P4PORT: ${{secrets.P4PORT}}
+  #     P4USER: ${{secrets.P4USER}}
+  #     P4PASSWD: ${{secrets.P4PASSWD}}
+  #     P4CLIENT: servbot_commoncontainer_sync_git_perforce
 
-    runs-on: [common,linux64]
-    container: 
-      image: fr-qafactorydev.europe.altair.com/common-linux64
-      credentials: 
-        username: ${{secrets.DOCKER_REGISTRY_USER}}
-        password: ${{secrets.DOCKER_REGISTRY_PASSWD}}
-      volumes: 
-        - /etc/localtime:/etc/localtime:ro
+  #   runs-on: [common,linux64]
+  #   container: 
+  #     image: fr-qafactorydev.europe.altair.com/common-linux64
+  #     credentials: 
+  #       username: ${{secrets.DOCKER_REGISTRY_USER}}
+  #       password: ${{secrets.DOCKER_REGISTRY_PASSWD}}
+  #     volumes: 
+  #       - /etc/localtime:/etc/localtime:ro
 
-    steps:
+  #   steps:
 
-    # Set the working dir suffixed with branch name
-    - uses: haya14busa/action-cond@v1
-      id: condval
-      with:
-        cond: ${{ github.base_ref == '' }}
-        if_true: ${{github.ref_name}}
-        if_false: ${{github.base_ref}}
-    - name: Use conditional value
-      run: |
-        echo "working-directory=${{ steps.condval.outputs.value }}" >> $GITHUB_ENV
+  #   # Set the working dir suffixed with branch name
+  #   - uses: haya14busa/action-cond@v1
+  #     id: condval
+  #     with:
+  #       cond: ${{ github.base_ref == '' }}
+  #       if_true: ${{github.ref_name}}
+  #       if_false: ${{github.base_ref}}
+  #   - name: Use conditional value
+  #     run: |
+  #       echo "working-directory=${{ steps.condval.outputs.value }}" >> $GITHUB_ENV
 
-    - name: Create branch oriented WS directory
-      run: mkdir -p ${{env.working-directory}}
+  #   - name: Create branch oriented WS directory
+  #     run: mkdir -p ${{env.working-directory}}
 
-    # Commercial files should not be present in this WS
-    - name: Create/Update perforce directory
-      working-directory: ${{env.working-directory}}
-      run: |
-        echo $P4PASSWD | p4 login
-        if ! p4 client -o -t $P4CLIENT > /dev/null 2>&1; then 
-          echo "Creating workspace $P4CLIENT (1st time run ?)"
-          echo "
-        Client: $P4CLIENT
-        Owner:  servbot
-        Root:   $PWD
-        Options:        noallwrite noclobber nocompress unlocked nomodtime normdir
-        SubmitOptions:  submitunchanged
-        LineEnd:        local
-        View:
-          //depot/Radioss/pfake_oss_mainline/... //$P4CLIENT/...
-          -//depot/Radioss/pfake_oss_mainline/.git/... //$P4CLIENT/.git/...
-          -//depot/Radioss/pfake_oss_mainline/.github/... //$P4CLIENT/.github/...
-          -//depot/Radioss/pfake_oss_mainline/C/... //$P4CLIENT/C/...
-          " | p4 client -i;
-        fi
-        p4 sync
+  #   # Commercial files should not be present in this WS
+  #   - name: Create/Update perforce directory
+  #     working-directory: ${{env.working-directory}}
+  #     run: |
+  #       echo $P4PASSWD | p4 login
+  #       if ! p4 client -o -t $P4CLIENT > /dev/null 2>&1; then 
+  #         echo "Creating workspace $P4CLIENT (1st time run ?)"
+  #         echo "
+  #       Client: $P4CLIENT
+  #       Owner:  servbot
+  #       Root:   $PWD
+  #       Options:        noallwrite noclobber nocompress unlocked nomodtime normdir
+  #       SubmitOptions:  submitunchanged
+  #       LineEnd:        local
+  #       View:
+  #         //depot/Radioss/pfake_oss_mainline/... //$P4CLIENT/...
+  #         -//depot/Radioss/pfake_oss_mainline/.git/... //$P4CLIENT/.git/...
+  #         -//depot/Radioss/pfake_oss_mainline/.github/... //$P4CLIENT/.github/...
+  #         -//depot/Radioss/pfake_oss_mainline/C/... //$P4CLIENT/C/...
+  #         " | p4 client -i;
+  #       fi
+  #       p4 sync
 
-    # Get last git modifications, don't clean before
-    - uses: actions/checkout@v2
-      with:
-        path: ${{env.working-directory}}
-        clean: 'false'
+  #   # Get last git modifications, don't clean before
+  #   - uses: actions/checkout@v2
+  #     with:
+  #       path: ${{env.working-directory}}
+  #       clean: 'false'
 
-    - name: Check files
-      working-directory: ${{env.working-directory}}
-      run: |
-        p4 status
-        p4 reconcile
+  #   - name: Check files
+  #     working-directory: ${{env.working-directory}}
+  #     run: |
+  #       p4 status
+  #       p4 reconcile
 
-    - name: Submit
-      working-directory: ${{env.working-directory}}
-      run: |
-        p4 submit -d "${{ needs.getPRInfos.outputs.p4_description }}"
+  #   - name: Submit
+  #     working-directory: ${{env.working-directory}}
+  #     run: |
+  #       p4 submit -d "${{ needs.getPRInfos.outputs.p4_description }}"
