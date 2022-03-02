@@ -12,11 +12,11 @@ on:
   # pull_request:
   #   branches: [ main ] 
 
-# When pushing in main or merging pull request in main
+# When pushing in main or merging pull request in main 
 #  ${{github.base_ref}} : <empty>
 #  ${{github.ref_name}} : main
 # When creating pull request in dev*
-#  ${{github.base_ref}} : main
+#  ${{github.base_ref}} : main 
 #  ${{github.ref_name}} : 1/merge
 
 jobs:
@@ -57,7 +57,7 @@ jobs:
       p4_description: "GIT Pull Request #${{github.event.number}} (${{ fromJSON(steps.pr_get_info.outputs.data).merge_commit_sha }}): ${{ fromJSON(steps.pr_get_info.outputs.data).title }}"
 
 
-  # sync:
+# sync:
 
   #   needs: getPRInfos
 
