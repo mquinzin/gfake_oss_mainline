@@ -13,7 +13,7 @@ on:
 #  ${{github.base_ref}} : <empty>
 #  ${{github.ref_name}} : main
 # When creating pull request in dev*
-#  ${{github.base_ref}} : main
+#  ${{github.base_ref}} : main 
 #  ${{github.ref_name}} : 1/merge
 
 jobs:
