@@ -35,6 +35,8 @@ jobs:
         password: ${{secrets.DOCKER_REGISTRY_PASSWD}}
       volumes: 
          - /etc/localtime:/etc/localtime:ro    
+    env: 
+      COMMIT_MSG: ''
          
     steps:
 
@@ -49,10 +51,11 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: "Check message"
+        id: generate_commit_msg
         run: |
           export COMMIT_MSG=$(echo "${{ fromJSON(steps.pr_get_info.outputs.data).commit.message }}" | sed 'H;1h;$!d;x; s/\n\n/\n/g')
           echo "Commit message is ${{ fromJSON(steps.pr_get_info.outputs.data).commit.message }}"
-          echo "COMMIT_MSG : $COMMIT_MSG"
+          echo "::set-output name=commit_msg1::XXX"
 
       - name: "Check failure"
         run: echo "Commit informations (${{github.sha}}) could not be found. Request failed with status ${{ steps.pr_get_info.outputs.status }}"
@@ -60,7 +63,7 @@ jobs:
 
 
     outputs:
-      p4_description: "[ GIT INTEG ] (${{github.sha}}) - $COMMIT_MSG"
+      p4_description: "[ GIT INTEG ] (${{github.sha}}) - ${{ steps.generate_commit_msg.outputs.commit_msg1 }}"
 
 
   sync:
