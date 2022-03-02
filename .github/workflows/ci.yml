@@ -61,7 +61,7 @@ jobs:
         if: ${{ failure() }}
 
     outputs:
-      p4_description: "[ GIT INTEG ] (${{github.sha}}) - ${{ steps.generate_commit_msg.outputs.commit_msg }}"
+      p4_description: "[ GIT INTEG ] ${{github.sha}} - ${{ steps.generate_commit_msg.outputs.commit_msg }}"
 
 
   sync:
