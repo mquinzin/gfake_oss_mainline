@@ -88,8 +88,6 @@ jobs:
       - name: "Check message"
         run: |
           echo "p4_description : ${{ needs.getPRInfos.outputs.p4_description }}"
-          make oo
-
 
       # Set the working dir suffixed with branch name
       - uses: haya14busa/action-cond@v1
