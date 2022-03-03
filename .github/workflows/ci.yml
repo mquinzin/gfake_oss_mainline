@@ -37,7 +37,11 @@ jobs:
          - /etc/localtime:/etc/localtime:ro    
     env: 
       COMMIT_MSG: ''
-         
+      P4PORT: ${{secrets.P4PORT}}
+      P4USER: ${{secrets.P4USER}}
+      P4PASSWD: ${{secrets.P4PASSWD}}
+      P4CLIENT: servbot_commoncontainer_sync_git_perforce
+
     steps:
 
       - name: Check current commit SHA
@@ -60,30 +64,30 @@ jobs:
         run: echo "Commit informations (${{github.sha}}) could not be found. Request failed with status ${{ steps.pr_get_info.outputs.status }}"
         if: ${{ failure() }}
 
-    outputs:
-      p4_description: "[ GIT INTEG ] ${{github.sha}} - ${{ steps.generate_commit_msg.outputs.commit_msg }}"
+  #   outputs:
+  #     p4_description: "[ GIT INTEG ] ${{github.sha}} - ${{ steps.generate_commit_msg.outputs.commit_msg }}"
 
 
-  sync:
+  # sync:
 
-    needs: getPRInfos
+  #   needs: getPRInfos
 
-    env:
-      P4PORT: ${{secrets.P4PORT}}
-      P4USER: ${{secrets.P4USER}}
-      P4PASSWD: ${{secrets.P4PASSWD}}
-      P4CLIENT: servbot_commoncontainer_sync_git_perforce
+  #   env:
+  #     P4PORT: ${{secrets.P4PORT}}
+  #     P4USER: ${{secrets.P4USER}}
+  #     P4PASSWD: ${{secrets.P4PASSWD}}
+  #     P4CLIENT: servbot_commoncontainer_sync_git_perforce
 
-    runs-on: [common,linux64]
-    container: 
-      image: fr-qafactorydev.europe.altair.com/common-linux64
-      credentials: 
-        username: ${{secrets.DOCKER_REGISTRY_USER}}
-        password: ${{secrets.DOCKER_REGISTRY_PASSWD}}
-      volumes: 
-        - /etc/localtime:/etc/localtime:ro
+  #   runs-on: [common,linux64]
+  #   container: 
+  #     image: fr-qafactorydev.europe.altair.com/common-linux64
+  #     credentials: 
+  #       username: ${{secrets.DOCKER_REGISTRY_USER}}
+  #       password: ${{secrets.DOCKER_REGISTRY_PASSWD}}
+  #     volumes: 
+  #       - /etc/localtime:/etc/localtime:ro
 
-    steps:
+  #   steps:
 
       - name: "Check message"
         run: |
@@ -147,5 +151,5 @@ jobs:
       - name: Submit
         working-directory: ${{env.working-directory}}
         run: |
-          p4 submit -d "${{ needs.getPRInfos.outputs.p4_description }}"
+          p4 submit -d "[ GIT INTEG ] ${{github.sha}} - ${{ steps.generate_commit_msg.outputs.commit_msg }}""
         if: ${{ steps.reconcile.outputs.opened_files > 0 }}
