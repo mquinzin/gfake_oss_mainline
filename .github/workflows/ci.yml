@@ -151,5 +151,5 @@ jobs:
       - name: Submit
         working-directory: ${{env.working-directory}}
         run: |
-          p4 submit -d "[ GIT INTEG ] ${{github.sha}} - ${{ steps.generate_commit_msg.outputs.commit_msg }}""
+          p4 submit -d "[ GIT INTEG ] ${{github.sha}} - ${{ steps.generate_commit_msg.outputs.commit_msg }}"
         if: ${{ steps.reconcile.outputs.opened_files > 0 }}
