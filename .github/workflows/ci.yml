@@ -149,3 +149,4 @@ jobs:
         working-directory: ${{env.working-directory}}
         run: |
           p4 submit -d "${{ needs.getPRInfos.outputs.p4_description }}"
+        if: ${{ steps.reconcile.outputs.opened_files > 0 }}
