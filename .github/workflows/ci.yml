@@ -107,7 +107,7 @@ jobs:
 
       - name: Get last git commits
         run: |
-          echo "Return commit is ${{ fromJSON(steps.commits_get_info.outputs.data) }}"
+          echo "Return commit is ${{ fromJSON(steps.commits_get_info.outputs.data)[] }}"
 
 
       # # Get all unsynced commit since last good one
