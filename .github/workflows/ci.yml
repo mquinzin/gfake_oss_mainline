@@ -92,10 +92,11 @@ jobs:
 
 
       # Get all unsynced commit since last good one
-      # - name: Get all unsynced commit since last good one
-      #   working-directory: ${{env.working-directory}}
-      #   run: |
-      #     echo"
+      - name: Get all unsynced commit since last good one
+        working-directory: ${{env.working-directory}}
+        run: |
+          echo "Last CL found on perforce is CL ${{ steps.found_perforce_infos.outputs.last_perforce_cl }}"
+
 
       # For each commit run the sync
 
