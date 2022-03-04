@@ -26,7 +26,7 @@ jobs:
   #       run: |
   #         echo "${{toJSON(github.event)}}"
 
-  getPRInfos:
+  syncGitPperforce:
     runs-on: [common,linux64]
     container: 
       image: fr-qafactorydev.europe.altair.com/common-linux64
@@ -36,7 +36,6 @@ jobs:
       volumes: 
          - /etc/localtime:/etc/localtime:ro    
     env: 
-      COMMIT_MSG: ''
       P4PORT: ${{secrets.P4PORT}}
       P4USER: ${{secrets.P4USER}}
       P4PASSWD: ${{secrets.P4PASSWD}}
@@ -57,7 +56,7 @@ jobs:
 
       - name: Create branch oriented WS directory
         run: mkdir -p ${{env.working-directory}}
-      
+
       # Create and update perforce WS, commercial files should not be present in this WS
       - name: Create/Update perforce directory
         working-directory: ${{env.working-directory}}
@@ -114,7 +113,7 @@ jobs:
 
       # - name: "Check message"
       #   run: |
-      #     echo "p4_description : ${{ needs.getPRInfos.outputs.p4_description }}"
+      #     echo "p4_description : ${{ needs.syncGitPperforce.outputs.p4_description }}"
 
 
 
