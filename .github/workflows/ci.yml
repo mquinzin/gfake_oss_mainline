@@ -43,61 +43,94 @@ jobs:
 
     steps:
 
-      # Set the working dir suffixed with branch name
-      - uses: haya14busa/action-cond@v1
-        id: condval
+      # # Set the working dir suffixed with branch name
+      # - uses: haya14busa/action-cond@v1
+      #   id: condval
+      #   with:
+      #     cond: ${{ github.base_ref == '' }}
+      #     if_true: ${{github.ref_name}}
+      #     if_false: ${{github.base_ref}}
+      # - name: Use conditional value
+      #   run: |
+      #     echo "working-directory=${{ steps.condval.outputs.value }}" >> $GITHUB_ENV
+
+      # - name: Create branch oriented WS directory
+      #   run: mkdir -p ${{env.working-directory}}
+
+      # # Create and update perforce WS, commercial files should not be present in this WS
+      # - name: Create/Update perforce directory
+      #   working-directory: ${{env.working-directory}}
+      #   run: |
+      #     echo $P4PASSWD | p4 login
+      #     if ! p4 client -o -t $P4CLIENT > /dev/null 2>&1; then 
+      #       echo "Creating workspace $P4CLIENT (1st time run ?)"
+      #       echo "
+      #     Client: $P4CLIENT
+      #     Owner:  servbot
+      #     Root:   $PWD
+      #     Options:        noallwrite noclobber nocompress unlocked nomodtime normdir
+      #     SubmitOptions:  submitunchanged
+      #     LineEnd:        local
+      #     View:
+      #       //depot/Radioss/pfake_oss_mainline/... //$P4CLIENT/...
+      #       -//depot/Radioss/pfake_oss_mainline/.git/... //$P4CLIENT/.git/...
+      #       -//depot/Radioss/pfake_oss_mainline/.github/... //$P4CLIENT/.github/...
+      #       -//depot/Radioss/pfake_oss_mainline/C/... //$P4CLIENT/C/...
+      #       " | p4 client -i;
+      #     fi
+      #     p4 sync
+
+      # # Get perforce last synced commit
+      # - name: Get perforce last synced commit
+      #   id: found_perforce_infos
+      #   working-directory: ${{env.working-directory}}
+      #   run: |
+      #     pwd
+      #     echo "::set-output name=last_commit_on_perforce::$(p4 changes -l -m 1 -s submitted ./...  | head -3 | tail -1 | sed -e "s/^.*\[ GIT INTEG \] //;s/ .*$//")"
+
+
+
+      # Get last N commits (N is max_check), get last commits since one week (in the way not to get too much information), and then get all commits after the last one found on perforce  
+      - name: Found date one week ago
+        run: |
+
+
+      - uses: octokit/request-action@v2.x
+        id: commits_get_info
         with:
-          cond: ${{ github.base_ref == '' }}
-          if_true: ${{github.ref_name}}
-          if_false: ${{github.base_ref}}
-      - name: Use conditional value
-        run: |
-          echo "working-directory=${{ steps.condval.outputs.value }}" >> $GITHUB_ENV
+          route: GET /repos/${{ github.repository }}/commits?since=$(date --date "7 days ago" +'%Y-%m-%dT%TZ')
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
 
-      - name: Create branch oriented WS directory
-        run: mkdir -p ${{env.working-directory}}
-
-      # Create and update perforce WS, commercial files should not be present in this WS
-      - name: Create/Update perforce directory
-        working-directory: ${{env.working-directory}}
+      - name: Get last git commits
         run: |
-          echo $P4PASSWD | p4 login
-          if ! p4 client -o -t $P4CLIENT > /dev/null 2>&1; then 
-            echo "Creating workspace $P4CLIENT (1st time run ?)"
-            echo "
-          Client: $P4CLIENT
-          Owner:  servbot
-          Root:   $PWD
-          Options:        noallwrite noclobber nocompress unlocked nomodtime normdir
-          SubmitOptions:  submitunchanged
-          LineEnd:        local
-          View:
-            //depot/Radioss/pfake_oss_mainline/... //$P4CLIENT/...
-            -//depot/Radioss/pfake_oss_mainline/.git/... //$P4CLIENT/.git/...
-            -//depot/Radioss/pfake_oss_mainline/.github/... //$P4CLIENT/.github/...
-            -//depot/Radioss/pfake_oss_mainline/C/... //$P4CLIENT/C/...
-            " | p4 client -i;
-          fi
-          p4 sync
+          echo "Return commit is ${{ fromJSON(steps.commits_get_info.outputs.data) }}"
 
-      # Get perforce last synced commit
-      - name: Get perforce last synced commit
-        id: found_perforce_infos
-        working-directory: ${{env.working-directory}}
-        run: |
-          pwd
-          echo "::set-output name=last_commit_on_perforce::$(p4 changes -l -m 1 -s submitted ./...  | head -3 | tail -1 | sed -e "s/^.*\[ GIT INTEG \] //;s/ .*$//")"
 
-      # Get all unsynced commit since last good one
-      - name: Get all unsynced commit since last good one
-        working-directory: ${{env.working-directory}}
-        shell: python3 {0}
-        run: |
-          if not os.path.isfile('/tmp/xxxxxxx'):
-            print("Last COMMIT found on perforce is ${{ steps.found_perforce_infos.outputs.last_commit_on_perforce }}\n");
-            test = 'icici';
-            print("ICI " + test + "\n");
-        if: steps.found_perforce_infos.outputs.last_commit_on_perforce != ''
+      # # Get all unsynced commit since last good one
+      # - name: Get all unsynced commit since last good one
+      #   working-directory: ${{env.working-directory}}
+      #   shell: python3 {0}
+      #   run: |
+      #     import os
+
+      #     max_check=10
+      #     # Get last N commits
+
+
+      #     it=0
+      #     max_check=10
+      #     while True and it < max_check:
+      #       print("Iteration " + str(it) + "\n")
+
+
+      #     # if not os.path.isfile('/tmp/xxxxxxx'):
+      #     #   print("Last COMMIT found on perforce is ${{ steps.found_perforce_infos.outputs.last_commit_on_perforce }}\n");
+      #     #   test = 'icici';
+      #     #   print("ICI " + test + "\n");
+
+      #   if: steps.found_perforce_infos.outputs.last_commit_on_perforce != ''
 
 
 
