@@ -91,21 +91,23 @@ jobs:
 
 
       # Get last N commits (N is max_check), get last commits since one week (in the way not to get too much information), and then get all commits after the last one found on perforce  
-        # run: |
+      - name: Provide env variables
+        id: env_variables
+        run: |
+          echo "::set-output name=date7daysago::$(date --date "7 days ago" +'%Y-%m-%dT%TZ')"
 
 
       - uses: octokit/request-action@v2.x
         id: commits_get_info
-        run: echo "Salut"
         with:
-          route: GET /repos/${{ github.repository }}/commits?since=$(date --date "7 days ago" +'%Y-%m-%dT%TZ')
+          route: GET /repos/${{ github.repository }}/commits?since=${{ steps.env_variables.outputs.date7daysago }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
 
       - name: Get last git commits
         run: |
-          echo "Return commit is ${{ fromJSON(steps.commits_get_info.outputs.data)[0].sha }}"
+          echo "Return commit is ${{ fromJSON(steps.commits_get_info.outputs.data) }}"
 
 
       # # Get all unsynced commit since last good one
