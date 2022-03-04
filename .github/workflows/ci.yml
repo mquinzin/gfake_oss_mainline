@@ -86,7 +86,7 @@ jobs:
         working-directory: ${{env.working-directory}}
         run: |
           pwd
-          echo "::set-output name=last_commit_on_perforce::$(p4 changes -l -m 1 -s submitted ./...  | head -3 | tail -1 | sed -e "s/^.*\[ GIT INTEG \] //;s/ .*$//")"
+          echo "::set-output name=last_commit_on_perforce::$(p4 changes -l -m 1 -s submitted ./...  | head -2 | tail -1 | sed -e "s/^.*\[ GIT INTEG \] //;s/ .*$//")"
 
       # Get all unsynced commit since last good one
       - name: Get all unsynced commit since last good one
