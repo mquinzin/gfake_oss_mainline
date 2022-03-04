@@ -93,7 +93,7 @@ jobs:
         working-directory: ${{env.working-directory}}
         run: |
           echo "Last COMMIT found on perforce is ${{ steps.found_perforce_infos.outputs.last_commit_on_perforce }}"
-        if: steps.found_perforce_infos.outputs.last_commit_on_perforce == "bf283e3abba643355371bd3b6611b7eabcbf48b"
+        if: steps.found_perforce_infos.outputs.last_commit_on_perforce == 'bf283e3abba643355371bd3b6611b7eabcbf48b'
 
 
       # For each commit run the sync
