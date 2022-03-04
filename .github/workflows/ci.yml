@@ -106,13 +106,18 @@ jobs:
       
 
       - name: Get last git commits
+        shell: python3 {0}
         run: |
-          echo "Return commit is ${{ fromJSON(steps.commits_get_info.outputs.data)[] }}"
+          import json
+
+          result_json = json.loads(r.text)
+          1st_commit = result_json[0]['sha']
+          print("Fist commit is " + 1st_commit + "\n");
+          # print "Return commit is ${{ fromJSON(steps.commits_get_info.outputs.data) }}"
 
 
       # # Get all unsynced commit since last good one
       # - name: Get all unsynced commit since last good one
-      #   working-directory: ${{env.working-directory}}
       #   shell: python3 {0}
       #   run: |
       #     import os
