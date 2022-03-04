@@ -87,6 +87,7 @@ jobs:
         run: |
           pwd
           echo "::set-output name=last_perforce_cl::$(p4 changes -l -m 1 -s submitted ./...  | head -1 | cut -d' ' -f2)"
+          p4 changes -l -m 1 -s submitted ./...  | head -1 | cut -d' ' -f2
           echo "Last CL found on perforce is CL ${{ steps.found_perforce_infos.outputs.last_perforce_cl }}"
 
 
