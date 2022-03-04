@@ -86,14 +86,18 @@ jobs:
         working-directory: ${{env.working-directory}}
         run: |
           pwd
-          echo "::set-output name=last_commit_on_perforce::$(p4 changes -l -m 1 -s submitted ./...  | head -2 | tail -1 | sed -e "s/^.*\[ GIT INTEG \] //;s/ .*$//")"
+          echo "::set-output name=last_commit_on_perforce::$(p4 changes -l -m 1 -s submitted ./...  | head -3 | tail -1 | sed -e "s/^.*\[ GIT INTEG \] //;s/ .*$//")"
 
       # Get all unsynced commit since last good one
       - name: Get all unsynced commit since last good one
         working-directory: ${{env.working-directory}}
+        shell: perl
         run: |
-          echo "Last COMMIT found on perforce is ${{ steps.found_perforce_infos.outputs.last_commit_on_perforce }}"
+          print "Last COMMIT found on perforce is ${{ steps.found_perforce_infos.outputs.last_commit_on_perforce }}\n";
+          my $test = 'icici';
+          print "ICI ".$test."\n";
         if: steps.found_perforce_infos.outputs.last_commit_on_perforce != ''
+
 
 
       # For each commit run the sync
