@@ -91,7 +91,7 @@ jobs:
       # Get all unsynced commit since last good one
       - name: Get all unsynced commit since last good one
         working-directory: ${{env.working-directory}}
-        shell: perl
+        shell: perl {0}
         run: |
           print "Last COMMIT found on perforce is ${{ steps.found_perforce_infos.outputs.last_commit_on_perforce }}\n";
           my $test = 'icici';
