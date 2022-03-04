@@ -91,7 +91,7 @@ jobs:
       # Get all unsynced commit since last good one
       - name: Get all unsynced commit since last good one
         working-directory: ${{env.working-directory}}
-        shell: python
+        shell: python3
         run: |
           if not os.path.isfile('/tmp/xxxxxxx'):
             print("Last COMMIT found on perforce is ${{ steps.found_perforce_infos.outputs.last_commit_on_perforce }}\n");
