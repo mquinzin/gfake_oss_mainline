@@ -130,7 +130,7 @@ jobs:
           for var in result_json:
 
             commit = var['sha']
-            if commit == ${{github.sha}}:
+            if commit == "${{github.sha}}":
               found_last = 1
               break
 
