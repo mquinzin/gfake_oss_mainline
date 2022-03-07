@@ -114,9 +114,9 @@ jobs:
         run: |
           import json
 
-          result_json_txt = "${{ fromJSON(steps.commits_get_info.outputs.data) }} }"
+          result_json_txt = "${{ fromJSON(steps.commits_get_info.outputs.data) }}"
           print(type(result_json_txt))
-          printf(result_json_txt)
+          print(result_json_txt)
           result_json = json.loads(result_json_txt)
           print(type(result_json))
           first_commit = result_json[0]['sha']
