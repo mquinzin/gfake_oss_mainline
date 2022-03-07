@@ -110,7 +110,7 @@ jobs:
         run: |
           import json
 
-          result_json = json.loads(${{ fromJson(steps.commits_get_info.outputs.data) }})
+          result_json = ${{ fromJson(steps.commits_get_info.outputs.data) }}
           print(type(result_json))
           first_commit = result_json[0]['sha']
           print("Fist commit is " + first_commit + "\n");
