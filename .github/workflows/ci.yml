@@ -112,6 +112,7 @@ jobs:
         run: |
           import sys
           import json
+          import requests
 
           git_url = "/repos/${{ github.repository }}/commits?since=${{ steps.env_variables.outputs.mindate }}"
           r = requests.get(git_url)
