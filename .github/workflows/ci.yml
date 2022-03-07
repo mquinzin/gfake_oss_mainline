@@ -123,13 +123,7 @@ jobs:
 
 
 
-          # result_json_txt = '''
-          # ${{ steps.commits_get_info.outputs.data }}
-          # '''
-          # print(type(result_json_txt))
-          # print(json.dumps(result_json_txt, sort_keys=True, indent=4))
-          # result_json = json.loads(result_json_txt)
-          # print(type(result_json))
+
           first_commit = result_json[0]['sha']
           print("Fist commit is " + first_commit + "\n");
 
