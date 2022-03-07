@@ -110,7 +110,8 @@ jobs:
         run: |
           # import json
 
-          result_json = ${{ steps.commits_get_info.outputs.data }}
+          # result_json = ${{ steps.commits_get_info.outputs.data }}
+          result_json = '[ { "sha": "xxxx", "node_id": "yyyy" } ]'
           first_commit = result_json[0]['sha']
           print("Fist commit is " + first_commit + "\n");
           # TBCCCC browse array of commit and keep the recent ones
