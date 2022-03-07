@@ -111,7 +111,7 @@ jobs:
           import json
 
           result_json_txt = '[ { "sha": "xxxx", "node_id": "yyyy" } ]'
-          result_json = json.loads(result_json)
+          result_json = json.loads(result_json_txt)
           first_commit = result_json[0]['sha']
           print("Fist commit is " + first_commit + "\n");
           # TBCCCC browse array of commit and keep the recent ones
