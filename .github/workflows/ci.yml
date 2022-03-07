@@ -108,9 +108,10 @@ jobs:
       - name: Get last git commits
         shell: python3 {0}
         run: |
-          # import json
+          import json
 
-          result_json = '[ { "sha": "xxxx", "node_id": "yyyy" } ]'
+          result_json_txt = '[ { "sha": "xxxx", "node_id": "yyyy" } ]'
+          result_json = json.loads(result_json)
           first_commit = result_json[0]['sha']
           print("Fist commit is " + first_commit + "\n");
           # TBCCCC browse array of commit and keep the recent ones
