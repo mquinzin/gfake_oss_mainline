@@ -40,7 +40,7 @@ jobs:
       P4USER: ${{secrets.P4USER}}
       P4PASSWD: ${{secrets.P4PASSWD}}
       P4CLIENT: servbot_commoncontainer_sync_git_perforce
-      max_commit_check: 4
+      DATE_MIN_CHECK_COMMITS: "7 days ago"
 
     steps:
 
@@ -91,17 +91,17 @@ jobs:
 
 
 
-      # Get last N commits (N is max_check), get last commits since one week (in the way not to get too much information), and then get all commits after the last one found on perforce  
+      # Get last N commits, get last commits since one week (in the way not to get too much information), and then get all commits after the last one found on perforce
       - name: Provide env variables
         id: env_variables
         run: |
-          echo "::set-output name=date7daysago::$(date --date "7 days ago" +'%Y-%m-%dT%TZ')"
+          echo "::set-output name=mindate::$(date --date "${{ env.DATE_MIN_CHECK_COMMITS}}" +'%Y-%m-%dT%TZ')"
 
 
       - uses: octokit/request-action@v2.x
         id: commits_get_info
         with:
-          route: GET /repos/${{ github.repository }}/commits?since=${{ steps.env_variables.outputs.date7daysago }}
+          route: GET /repos/${{ github.repository }}/commits?since=${{ steps.env_variables.outputs.mindate }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -110,6 +110,7 @@ jobs:
           echo "JSON is ${{ steps.commits_get_info.outputs.data }}"
       
       # Get all unsynced commit since last good one
+      # If we never meet the last known commit on perforce we abort, that could mean there are more commits to into account
       - name: Get all unsynced commit since last good one
         shell: python3 {0}
         run: |
@@ -125,22 +126,23 @@ jobs:
           # first_commit = result_json[0]['sha']
           # print("Fist commit is " + first_commit + "\n");
           commits_higher_than_last = []
-          it = 1
+          found_last = 0
 
           for var in result_json:
-            if it > ${{ env.max_commit_check }}:
-              break
 
             commit = var['sha']
             print("FOUND COMMIT " + commit + "\n")
             if commit == "ab11905947223d1f543d2a5bd558357afb20192c":
+              found_last = 1
               break
 
             commits_higher_than_last.append(commit)
-            it += 1
 
           print("All commits to deal with are ")
           print(commits_higher_than_last)
+
+          if ! found_last:
+            print("Last commit has not been identified in the commits in the interval ${{ env.DATE_MIN_CHECK_COMMITS}} -> now, maybe several commit must be taken into account")
 
       # # Get all unsynced commit since last good one
       # - name: Get all unsynced commit since last good one
