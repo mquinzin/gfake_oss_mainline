@@ -120,8 +120,8 @@ jobs:
           print(type(result_json_txt))
           print(json.dumps(result_json_txt, sort_keys=True, indent=4))
           # print(result_json_txt)
-          # result_json = json.loads(result_json_txt)
-          # print(type(result_json))
+          result_json = json.loads(result_json_txt)
+          print(type(result_json))
           # first_commit = result_json[0]['sha']
           # print("Fist commit is " + first_commit + "\n");
           # TBCCCC browse array of commit and keep the recent ones
