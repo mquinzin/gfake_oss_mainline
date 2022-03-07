@@ -98,12 +98,12 @@ jobs:
           echo "::set-output name=mindate::$(date --date '${{ env.DATE_MIN_CHECK_COMMITS }}' +'%Y-%m-%dT%TZ')"
 
 
-      - uses: octokit/request-action@v2.x
-        id: commits_get_info
-        with:
-          route: GET /repos/${{ github.repository }}/commits?since=${{ steps.env_variables.outputs.mindate }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # - uses: octokit/request-action@v2.x
+      #   id: commits_get_info
+      #   with:
+      #     route: GET /repos/${{ github.repository }}/commits?since=${{ steps.env_variables.outputs.mindate }}
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
       # Get all unsynced commit since last good one
       # If we never meet the last known commit on perforce we abort, that could mean there are more commits to into account
@@ -114,7 +114,7 @@ jobs:
           import json
           import requests
 
-          git_url = "/repos/${{ github.repository }}/commits?since=${{ steps.env_variables.outputs.mindate }}"
+          git_url = "${{ github.api_url }}/repos/${{ github.repository }}/commits?since=${{ steps.env_variables.outputs.mindate }}"
           r = requests.get(git_url)
           if (r.status_code != 200):
               sys.exit("Github API REST access return error code : " + str(r.status_code))
