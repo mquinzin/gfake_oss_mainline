@@ -110,9 +110,9 @@ jobs:
         run: |
           import json
 
-          result_json = json.loads(${{ steps.commits_get_info.outputs.data }})
-          # first_commit = result_json[0]['sha']
-          # print("Fist commit is " + first_commit + "\n");
+          result_json = ${{ steps.commits_get_info.outputs.data }}
+          first_commit = result_json[0]['sha']
+          print("Fist commit is " + first_commit + "\n");
           # TBCCCC browse array of commit and keep the recent ones
           # print "Return commit is ${{ fromJSON(steps.commits_get_info.outputs.data) }}"
 
