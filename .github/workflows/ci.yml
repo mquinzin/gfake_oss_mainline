@@ -95,7 +95,7 @@ jobs:
       - name: Provide env variables
         id: env_variables
         run: |
-          echo "::set-output name=mindate::$(date --date "${{ env.DATE_MIN_CHECK_COMMITS}}" +'%Y-%m-%dT%TZ')"
+          echo "::set-output name=mindate::$(date --date \"${{ env.DATE_MIN_CHECK_COMMITS }}\" +'%Y-%m-%dT%TZ')"
 
 
       - uses: octokit/request-action@v2.x
@@ -105,9 +105,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: "Trace"
-        run: |
-          echo "JSON is ${{ steps.commits_get_info.outputs.data }}"
+      # - name: "Trace"
+      #   run: |
+      #     echo "JSON is ${{ steps.commits_get_info.outputs.data }}"
       
       # Get all unsynced commit since last good one
       # If we never meet the last known commit on perforce we abort, that could mean there are more commits to into account
