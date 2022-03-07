@@ -96,6 +96,7 @@ jobs:
         id: env_variables
         run: |
           echo "::set-output name=date7daysago::$(date --date "7 days ago" +'%Y-%m-%dT%TZ')"
+          echo "max_commit_check :::: ${{ jobs.syncGitPperforce.env.max_commit_check }}"
 
 
       - uses: octokit/request-action@v2.x
