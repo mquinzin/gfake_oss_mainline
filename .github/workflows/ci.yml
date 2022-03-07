@@ -127,7 +127,7 @@ jobs:
           # print("Fist commit is " + first_commit + "\n");
           commits_higher_than_last = []
           it = 1
-          max_check = ${{ jobs.syncGitPperforce.env.max_commit_check }}
+          max_check = 3 #${{ jobs.syncGitPperforce.env.max_commit_check }}
           print("max_commit_check : " + max_check + "\n")
 
           for var in result_json:
