@@ -113,7 +113,7 @@ jobs:
           import sys
           import json
 
-          git_url = jenkins_url + "/repos/${{ github.repository }}/commits?since=${{ steps.env_variables.outputs.mindate }}"
+          git_url = "/repos/${{ github.repository }}/commits?since=${{ steps.env_variables.outputs.mindate }}"
           r = requests.get(git_url)
           if (r.status_code != 200):
               sys.exit("Github API REST access return error code : " + str(r.status_code))
