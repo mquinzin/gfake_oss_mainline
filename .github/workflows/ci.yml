@@ -108,7 +108,7 @@ jobs:
       - name: Get last git commits
         shell: python3 {0}
         run: |
-          import json
+          # import json
 
           result_json = ${{ steps.commits_get_info.outputs.data }}
           first_commit = result_json[0]['sha']
