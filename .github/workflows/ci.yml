@@ -106,7 +106,7 @@ jobs:
 
       - name: "Trace"
         run: |
-          echo "JSON is ${{ fromJSON(steps.commits_get_info.outputs.data) }}"
+          echo "JSON is ${{ steps.commits_get_info.outputs.data }}"
       
 
       - name: Get last git commits
