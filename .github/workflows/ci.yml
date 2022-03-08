@@ -99,7 +99,9 @@ jobs:
             --git_repo ${{ github.repository }} \
             --git_user mquinzin \
             --git_token ${{ secrets.GITHUB_TOKEN }} \
-            --interval_check "2 days ago"
+            --interval_check "2 days ago" \
+            --perforce_last_commit 8083497842c43deaf33714bde307e4b40a413200 \
+            --output_file /tmp/commits_list
 
       # - name: Check current commit SHA
       #   run: echo "Current commit SHA is ${{github.sha}}"
