@@ -143,10 +143,16 @@ jobs:
       ## For each commit found: get git files, p4 reconcile and submit
       - name: Upgrade perforce for each git commit found
         run: |
-          for commit in `cat ${{ env.COMMIT_LIST_FILE }}`
-          do 
-            echo "Git clone with commit : ${commit}"
-          done
+
+          while read LINE
+          do
+            IFS='||'; arrIN=($LINE); unset IFS;
+            echo "Checkout commit ${arrIN[0]}, use message ${arrIN[2]}"
+
+          done < ${{ env.COMMIT_LIST_FILE }}
+
+
+
 
 
 
