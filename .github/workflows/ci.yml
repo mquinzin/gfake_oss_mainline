@@ -41,6 +41,7 @@ jobs:
       P4PASSWD: ${{secrets.P4PASSWD}}
       P4CLIENT: servbot_commoncontainer_sync_git_perforce
       DATE_MIN_CHECK_COMMITS: "7 days ago"
+      COMMIT_LIST_FILE: /tmp/commits_list
 
     steps:
 
@@ -101,9 +102,8 @@ jobs:
             --git_token ${{ secrets.GITHUB_TOKEN }} \
             --interval_check "2 days ago" \
             --perforce_last_commit 8083497842c43deaf33714bde307e4b40a413200 \
-            --output_file /tmp/commits_list
+            --output_file ${{ env.COMMIT_LIST_FILE }}
 
-          cat /tmp/commits_list
 
       ## Get current commit informations
       # - name: Check current commit SHA
@@ -127,7 +127,13 @@ jobs:
       #     echo "p4_description : ${{ needs.syncGitPperforce.outputs.p4_description }}"
 
 
-
+      ## For each commit found: get git files, p4 reconcile and submit
+      - name: Upgrade perforce for each git commit found
+        run: |
+          for commit in `cat ${{ env.COMMIT_LIST_FILE }}`
+          do 
+            echo "Git clone with commit : ${commit}"
+          done
 
 
       # # Get last git modifications, don't clean before
