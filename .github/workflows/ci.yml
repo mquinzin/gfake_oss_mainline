@@ -91,18 +91,18 @@ jobs:
       #     echo "::set-output name=last_commit_on_perforce::$(p4 changes -l -m 1 -s submitted ./...  | head -3 | tail -1 | sed -e "s/^.*\[ GIT INTEG \] //;s/ .*$//")"
 
       
-      # Get all unsynced commit since last good one
-      # If we never meet the last known commit on perforce we abort, that could mean there are more commits to into account
-      - name: Get all unsynced commit since last good one
-        run: |
-          /__w/_tool/sync_git_2_perforce.py \
-            --git_api_url ${{ github.api_url }} \
-            --git_repo ${{ github.repository }} \
-            --git_user ${{ github.actor }} \
-            --git_token ${{ secrets.GITHUB_TOKEN }} \
-            --interval_check "2 days ago" \
-            --perforce_last_commit 8083497842c43deaf33714bde307e4b40a413200 \
-            --output_file ${{ env.COMMIT_LIST_FILE }}
+      # # Get all unsynced commit since last good one
+      # # If we never meet the last known commit on perforce we abort, that could mean there are more commits to into account
+      # - name: Get all unsynced commit since last good one
+      #   run: |
+      #     /__w/_tool/sync_git_2_perforce.py \
+      #       --git_api_url ${{ github.api_url }} \
+      #       --git_repo ${{ github.repository }} \
+      #       --git_user ${{ github.actor }} \
+      #       --git_token ${{ secrets.GITHUB_TOKEN }} \
+      #       --interval_check "2 days ago" \
+      #       --perforce_last_commit 8083497842c43deaf33714bde307e4b40a413200 \
+      #       --output_file ${{ env.COMMIT_LIST_FILE }}
 
 
       ## Get current commit informations
@@ -127,20 +127,26 @@ jobs:
       #     echo "p4_description : ${{ needs.syncGitPperforce.outputs.p4_description }}"
 
 
-      ## For each commit found: get git files, p4 reconcile and submit
-      - name: Upgrade perforce for each git commit found
-        run: |
-          for commit in `cat ${{ env.COMMIT_LIST_FILE }}`
-          do 
-            echo "Git clone with commit : ${commit}"
-          done
+      # ## For each commit found: get git files, p4 reconcile and submit
+      # - name: Upgrade perforce for each git commit found
+      #   run: |
+      #     for commit in `cat ${{ env.COMMIT_LIST_FILE }}`
+      #     do 
+      #       echo "Git clone with commit : ${commit}"
+      #     done
+      
+      # Create local git repo if it does not exist (1s time)
+      - name: Check .git presence (does file .git/logs/HEAD exist ?)
+        id: check_git_dir
+        uses: andstor/file-existence-action@v1
+        with:
+          files: ".git/logs/HEAD"
 
-
-      # # Get last git modifications, don't clean before
-      # - uses: actions/checkout@v2
-      #   with:
-      #     path: ${{env.working-directory}}
-      #     clean: 'false'
+      - uses: actions/checkout@v2
+        with:
+          path: ${{env.working-directory}}
+          clean: 'false'
+        if: steps.check_git_dir.outputs.files_exists == 'true'
 
       # - name: Check files
       #   working-directory: ${{env.working-directory}}
