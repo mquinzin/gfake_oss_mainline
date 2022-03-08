@@ -100,7 +100,7 @@ jobs:
             --git_repo ${{ github.repository }} \
             --git_user ${{ github.actor }} \
             --git_token ${{ secrets.GITHUB_TOKEN }} \
-            --interval_check "${{ env.DATE_MIN_CHECK_COMMITS }}"" \
+            --interval_check "${{ env.DATE_MIN_CHECK_COMMITS }}" \
             --perforce_last_commit ${{ steps.found_perforce_infos.outputs.last_commit_on_perforce }} \
             --output_file ${{ env.COMMIT_LIST_FILE }}
 
