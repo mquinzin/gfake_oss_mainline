@@ -95,9 +95,11 @@ jobs:
       - name: Get all unsynced commit since last good one
         run: |
           /__w/_tool/sync_git_2_perforce.py \
-            --git_api_url ${{ github.api_url }}
-
-
+            --git_api_url ${{ github.api_url }} \
+            --git_repo ${{ github.repository }} \
+            --git_user mquinzin \
+            --git_token ${{ secrets.GITHUB_TOKEN }} \
+            --interval_check "2 days ago"
 
       # - name: Check current commit SHA
       #   run: echo "Current commit SHA is ${{github.sha}}"
