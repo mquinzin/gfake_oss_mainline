@@ -146,7 +146,7 @@ jobs:
         with:
           path: ${{env.working-directory}}
           clean: 'false'
-        if: steps.check_git_dir.outputs.files_exists == 'true'
+        if: steps.check_git_dir.outputs.files_exists == 'false'
 
       # - name: Check files
       #   working-directory: ${{env.working-directory}}
