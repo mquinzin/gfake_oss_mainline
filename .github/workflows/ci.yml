@@ -133,12 +133,16 @@ jobs:
         uses: andstor/file-existence-action@v1
         with:
           files: "${{env.working-directory}}/.git/logs/HEAD"
-
       - uses: actions/checkout@v2
         with:
           path: ${{env.working-directory}}
           clean: 'false'
         if: steps.check_git_dir.outputs.files_exists == 'false'
+      - name: Unshallow the git log the first time, else we won't be able to checkout commits 
+        working-directory: ${{env.working-directory}}
+        run: git fetch --unshallow
+        if: steps.check_git_dir.outputs.files_exists == 'false'
+
 
       ## For each commit found: get git files, p4 reconcile and submit
       - name: Upgrade perforce for each git commit found
