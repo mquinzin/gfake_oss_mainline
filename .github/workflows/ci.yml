@@ -154,14 +154,14 @@ jobs:
             p4 status
             p4 reconcile
             opened_files_nb=$(p4 opened | wc -l)
-            echo "OPENED : ${opened_files_nb}"
+            #echo "OPENED : ${opened_files_nb}"
             if [ ${opened_files_nb} -gt 0 ]
             then 
               echo "p4 submit -d \"${message}\""
             fi
             
             opened_files_nb=$(p4 opened | wc -l)
-            echo "OPENED : ${opened_files_nb}"
+            #echo "OPENED : ${opened_files_nb}"
             if [ ${opened_files_nb} -gt 0 ]
             then
               echo "ABORTING, there are still opened files after p4 submit:"
