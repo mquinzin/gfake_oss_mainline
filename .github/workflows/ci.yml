@@ -147,6 +147,8 @@ jobs:
             IFS='||'; arrIN=($LINE); unset IFS;
             message="[ GIT INTEG ] ${arrIN[0]} - ${arrIN[2]}"
             echo "---------------------------------"
+            echo "-- ${arrIN[0]} --"
+            echo "---------------------------------"
             git checkout ${arrIN[0]}
             p4 status
             p4 reconcile
