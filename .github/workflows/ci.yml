@@ -148,16 +148,16 @@ jobs:
       - name: Upgrade perforce for each git commit found
         working-directory: ${{env.working-directory}}
         run: |
+          git log -n 5
+          # while read LINE
+          # do
+          #   IFS='||'; arrIN=($LINE); unset IFS;
+          #   echo "Checkout commit ${arrIN[0]}, use message ${arrIN[2]}"
+          #   git checkout ${arrIN[0]}
+          #   cat file1 
 
-          while read LINE
-          do
-            IFS='||'; arrIN=($LINE); unset IFS;
-            echo "Checkout commit ${arrIN[0]}, use message ${arrIN[2]}"
-            git checkout ${arrIN[0]}
-            cat file1 
 
-
-          done < ${{ env.COMMIT_LIST_FILE }}
+          # done < ${{ env.COMMIT_LIST_FILE }}
 
 
 
