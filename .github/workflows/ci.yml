@@ -147,8 +147,6 @@ jobs:
             IFS='||'; arrIN=($LINE); unset IFS;
             echo "Checkout commit ${arrIN[0]}, use message ${arrIN[2]}"
             git checkout ${arrIN[0]}
-            cat file1 
-
 
           done < ${{ env.COMMIT_LIST_FILE }}
 
