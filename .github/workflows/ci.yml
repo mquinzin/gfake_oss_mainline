@@ -103,7 +103,6 @@ jobs:
             --interval_check "${{ env.DATE_MIN_CHECK_COMMITS }}" \
             --perforce_last_commit ${{ steps.found_perforce_infos.outputs.last_commit_on_perforce }} \
             --output_file ${{ env.COMMIT_LIST_FILE }}
-          ls -la ~/.
 
 
       ## Get current commit informations
@@ -142,7 +141,7 @@ jobs:
       - name: Upgrade perforce for each git commit found
         working-directory: ${{env.working-directory}}
         run: |
-          git log -n 5
+          git config --global advice.detachedHead false
           while read LINE
           do
             IFS='||'; arrIN=($LINE); unset IFS;
