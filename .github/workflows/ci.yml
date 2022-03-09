@@ -157,7 +157,7 @@ jobs:
             #echo "OPENED : ${opened_files_nb}"
             if [ ${opened_files_nb} -gt 0 ]
             then 
-              echo "p4 submit -d \"${message}\""
+              p4 submit -d "${message}"
               opened_files_nb=$(p4 opened | wc -l)
               #echo "OPENED : ${opened_files_nb}"
               if [ ${opened_files_nb} -gt 0 ]
