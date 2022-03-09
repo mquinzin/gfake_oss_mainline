@@ -152,7 +152,12 @@ jobs:
             git checkout ${arrIN[0]}
             p4 status
             p4 reconcile
-            p4 opened | wc -l
+            opened_files_nb=$(p4 opened | wc -l)
+            echo "OPENED : ${opened_files_nb}"
+            if [ ${opened_files_nb} -gt 0 ]
+            then 
+              echo "p4 submit -d \"${message}\""
+            fi
             p4 revert -k ./...
 
           done < ${{ env.COMMIT_LIST_FILE }}
