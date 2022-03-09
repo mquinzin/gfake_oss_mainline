@@ -103,6 +103,7 @@ jobs:
             --interval_check "${{ env.DATE_MIN_CHECK_COMMITS }}" \
             --perforce_last_commit ${{ steps.found_perforce_infos.outputs.last_commit_on_perforce }} \
             --output_file ${{ env.COMMIT_LIST_FILE }}
+          ls -la ~/.
 
 
       ## Get current commit informations
