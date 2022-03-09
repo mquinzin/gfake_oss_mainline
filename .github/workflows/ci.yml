@@ -138,6 +138,7 @@ jobs:
 
 
       ## For each commit found: get git files, p4 reconcile and submit
+      # If some file are still opened after submit, abort
       - name: Upgrade perforce for each git commit found
         working-directory: ${{env.working-directory}}
         run: |
@@ -158,7 +159,15 @@ jobs:
             then 
               echo "p4 submit -d \"${message}\""
             fi
-            p4 revert -k ./...
+            
+            opened_files_nb=$(p4 opened | wc -l)
+            echo "OPENED : ${opened_files_nb}"
+            if [ ${opened_files_nb} -gt 0 ]
+            then
+              echo "ABORTING, there are still opened files after p4 submit:"
+              p4 opened 
+              exit 1
+            fi
 
           done < ${{ env.COMMIT_LIST_FILE }}
 
