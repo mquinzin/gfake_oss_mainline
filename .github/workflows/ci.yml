@@ -166,6 +166,8 @@ jobs:
             then
               echo "ABORTING, there are still opened files after p4 submit:"
               p4 opened 
+              echo "REVERTING LAST CHANGES"
+              p4 revert ./...
               exit 1
             fi
 
