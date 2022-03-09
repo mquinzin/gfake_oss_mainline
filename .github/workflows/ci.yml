@@ -127,21 +127,14 @@ jobs:
       #     echo "p4_description : ${{ needs.syncGitPperforce.outputs.p4_description }}"
 
       
-      # Create local git repo if it does not exist (1s time)
-      - name: Check .git presence (does file .git/logs/HEAD exist ?)
-        id: check_git_dir
-        uses: andstor/file-existence-action@v1
-        with:
-          files: "${{env.working-directory}}/.git/logs/HEAD"
+      # Create/Upgrade local git repo
       - uses: actions/checkout@v2
         with:
           path: ${{env.working-directory}}
           clean: 'false'
-        # if: steps.check_git_dir.outputs.files_exists == 'false'
       - name: Unshallow the git log the first time, else we won't be able to checkout commits 
         working-directory: ${{env.working-directory}}
         run: git fetch --unshallow
-        # if: steps.check_git_dir.outputs.files_exists == 'false'
 
 
       ## For each commit found: get git files, p4 reconcile and submit
@@ -149,15 +142,15 @@ jobs:
         working-directory: ${{env.working-directory}}
         run: |
           git log -n 5
-          # while read LINE
-          # do
-          #   IFS='||'; arrIN=($LINE); unset IFS;
-          #   echo "Checkout commit ${arrIN[0]}, use message ${arrIN[2]}"
-          #   git checkout ${arrIN[0]}
-          #   cat file1 
+          while read LINE
+          do
+            IFS='||'; arrIN=($LINE); unset IFS;
+            echo "Checkout commit ${arrIN[0]}, use message ${arrIN[2]}"
+            git checkout ${arrIN[0]}
+            cat file1 
 
 
-          # done < ${{ env.COMMIT_LIST_FILE }}
+          done < ${{ env.COMMIT_LIST_FILE }}
 
 
 
