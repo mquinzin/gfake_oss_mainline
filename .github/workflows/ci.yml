@@ -57,7 +57,9 @@ jobs:
           echo "working-directory=${{ steps.condval.outputs.value }}" >> $GITHUB_ENV
 
       - name: Create branch oriented WS directory
-        run: mkdir -p ${{env.working-directory}}
+        run: |
+          mkdir -p ${{env.working-directory}}
+          sleep 20
 
       # Create and update perforce WS, commercial files should not be present in this WS
       - name: Create/Update perforce directory
