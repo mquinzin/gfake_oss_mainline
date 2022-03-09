@@ -145,8 +145,9 @@ jobs:
           while read LINE
           do
             IFS='||'; arrIN=($LINE); unset IFS;
-            echo "Checkout commit ${arrIN[0]}, use message ${arrIN[2]}"
+            message="[ GIT INTEG ] ${arrIN[0]} + ${arrIN[2]}""
             git checkout ${arrIN[0]}
+            echo "Deal with : ${message}"
 
           done < ${{ env.COMMIT_LIST_FILE }}
 
