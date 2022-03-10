@@ -184,7 +184,7 @@ jobs:
       #   working-directory: ${{env.working-directory}}
       #   id: reconcile
       #   run: |
-      #     p4 status
+      #     p4 status 
       #     p4 reconcile
       #     echo "::set-output name=opened_files::$(p4 opened | wc -l)"
 
