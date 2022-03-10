@@ -40,7 +40,7 @@ jobs:
       P4USER: ${{secrets.P4USER}}
       P4PASSWD: ${{secrets.P4PASSWD}}
       P4CLIENT: servbot_commoncontainer_sync_git_perforce
-      DATE_MIN_CHECK_COMMITS: "1 minute ago"
+      DATE_MIN_CHECK_COMMITS: "7 days ago"
       COMMIT_LIST_FILE: /tmp/commits_list
 
     steps:
