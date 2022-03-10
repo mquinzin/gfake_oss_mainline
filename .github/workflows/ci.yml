@@ -96,7 +96,7 @@ jobs:
       # If we never meet the last known commit on perforce we abort, that could mean there are more commits to into account
       - name: Get all unsynced commit since last good one
         run: |
-          sync_git_2_perfrce.py \
+          sync_git_2_perforce.py \
             --git_api_url ${{ github.api_url }} \
             --git_repo ${{ github.repository }} \
             --git_user ${{ github.actor }} \
