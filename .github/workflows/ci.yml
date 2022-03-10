@@ -6,9 +6,6 @@ on:
     branches:
       - main
 
-  # pull_request:
-  #   branches: [ main ]
-
 # When pushing in main or merging pull request in main
 #  ${{github.base_ref}} : <empty>
 #  ${{github.ref_name}} : main 
@@ -17,14 +14,6 @@ on:
 #  ${{github.ref_name}} : 1/merge
 
 jobs:
-
-  # log-github-event-goodies:
-  #   name: "LOG Everything on GitHub Event"
-  #   runs-on: ubuntu-latest 
-  #   steps:
-  #     - name: Logging
-  #       run: |
-  #         echo "${{toJSON(github.event)}}"
 
   syncGitPperforce:
     runs-on: [common,linux64]
@@ -91,7 +80,6 @@ jobs:
           pwd
           echo "::set-output name=last_commit_on_perforce::$(p4 changes -l -m 1 -s submitted ./...  | head -3 | tail -1 | sed -e "s/^.*\[ GIT INTEG \] //;s/ .*$//")"
 
-      
       # Get all unsynced commit since last good one
       # If we never meet the last known commit on perforce we abort, that could mean there are more commits to into account
       - name: Get all unsynced commit since last good one
@@ -106,38 +94,14 @@ jobs:
             --output_file ${{ env.COMMIT_LIST_FILE }} \
             --current_commit ${{github.sha}}
 
-
-      ## Get current commit informations
-      # - name: Check current commit SHA
-      #   run: echo "Current commit SHA is ${{github.sha}}"
-      # - uses: octokit/request-action@v2.x
-      #   id: pr_get_info
-      #   with:
-      #     route: GET /repos/${{ github.repository }}/commits/${{github.sha}}
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      # - name: "Build commit message"
-      #   id: generate_commit_msg
-      #   run: |
-      #     echo "Commit message is ${{ fromJSON(steps.pr_get_info.outputs.data).commit.message }}"
-      #     echo "::set-output name=commit_msg::$(echo "${{ fromJSON(steps.pr_get_info.outputs.data).commit.message }}" | sed 'H;1h;$!d;x; s/\n\n/ - /g')"
-      # - name: "Check failure"
-      #   run: echo "Commit informations (${{github.sha}}) could not be found. Request failed with status ${{ steps.pr_get_info.outputs.status }}"
-      #   if: ${{ failure() }}
-      # - name: "Check message"
-      #   run: |
-      #     echo "p4_description : ${{ needs.syncGitPperforce.outputs.p4_description }}"
-
-      
       # Create/Upgrade local git repo
       - uses: actions/checkout@v2
         with:
           path: ${{env.working-directory}}
           clean: 'false'
-      - name: Unshallow the git log the first time, else we won't be able to checkout commits 
+      - name: Unshallow the git log, else we won't be able to checkout commits 
         working-directory: ${{env.working-directory}}
         run: git fetch --unshallow
-
 
       ## For each commit found: get git files, p4 reconcile and submit
       # If some file are still opened after submit, abort
@@ -173,26 +137,3 @@ jobs:
             fi
 
           done < ${{ env.COMMIT_LIST_FILE }}
-
-
-
-
-
-
-      # - name: Check files
-      #   working-directory: ${{env.working-directory}}
-      #   id: reconcile
-      #   run: |
-      #     p4 status 
-      #     p4 reconcile
-      #     echo "::set-output name=opened_files::$(p4 opened | wc -l)"
-
-      # - name: "Check opened files"
-      #   run: |
-      #     echo "opened_files : ${{ steps.reconcile.outputs.opened_files }}"          
-
-      # - name: Submit
-      #   working-directory: ${{env.working-directory}}
-      #   run: |
-      #     p4 submit -d "[ GIT INTEG ] ${{github.sha}} - ${{ steps.generate_commit_msg.outputs.commit_msg }}"
-      #   if: ${{ steps.reconcile.outputs.opened_files > 0 }}
