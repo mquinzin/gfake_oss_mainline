@@ -49,91 +49,91 @@ jobs:
         run: |
           mkdir -p ${{env.working-directory}}
 
-      # Create and update perforce WS, commercial files should not be present in this WS
-      - name: Create/Update perforce directory
-        working-directory: ${{env.working-directory}}
-        run: |
-          echo $P4PASSWD | p4 login
-          if ! p4 client -o -t $P4CLIENT > /dev/null 2>&1; then 
-            echo "Creating workspace $P4CLIENT (1st time run ?)"
-            echo "
-          Client: $P4CLIENT
-          Owner:  servbot
-          Root:   $PWD
-          Options:        noallwrite noclobber nocompress unlocked nomodtime normdir
-          SubmitOptions:  submitunchanged
-          LineEnd:        local
-          View:
-            //depot/Radioss/pfake_oss_mainline/... //$P4CLIENT/...
-            -//depot/Radioss/pfake_oss_mainline/.git/... //$P4CLIENT/.git/...
-            -//depot/Radioss/pfake_oss_mainline/.github/... //$P4CLIENT/.github/...
-            -//depot/Radioss/pfake_oss_mainline/C/... //$P4CLIENT/C/...
-            " | p4 client -i;
-          fi
-          p4 sync
+      # # Create and update perforce WS, commercial files should not be present in this WS
+      # - name: Create/Update perforce directory
+      #   working-directory: ${{env.working-directory}}
+      #   run: |
+      #     echo $P4PASSWD | p4 login
+      #     if ! p4 client -o -t $P4CLIENT > /dev/null 2>&1; then 
+      #       echo "Creating workspace $P4CLIENT (1st time run ?)"
+      #       echo "
+      #     Client: $P4CLIENT
+      #     Owner:  servbot
+      #     Root:   $PWD
+      #     Options:        noallwrite noclobber nocompress unlocked nomodtime normdir
+      #     SubmitOptions:  submitunchanged
+      #     LineEnd:        local
+      #     View:
+      #       //depot/Radioss/pfake_oss_mainline/... //$P4CLIENT/...
+      #       -//depot/Radioss/pfake_oss_mainline/.git/... //$P4CLIENT/.git/...
+      #       -//depot/Radioss/pfake_oss_mainline/.github/... //$P4CLIENT/.github/...
+      #       -//depot/Radioss/pfake_oss_mainline/C/... //$P4CLIENT/C/...
+      #       " | p4 client -i;
+      #     fi
+      #     p4 sync
 
-      # Get perforce last synced commit
-      - name: Get perforce last synced commit
-        id: found_perforce_infos
-        working-directory: ${{env.working-directory}}
-        run: |
-          pwd
-          echo "::set-output name=last_commit_on_perforce::$(p4 changes -l -m 1 -s submitted ./...  | head -3 | tail -1 | sed -e "s/^.*\[ GIT INTEG \] //;s/ .*$//")"
+      # # Get perforce last synced commit
+      # - name: Get perforce last synced commit
+      #   id: found_perforce_infos
+      #   working-directory: ${{env.working-directory}}
+      #   run: |
+      #     pwd
+      #     echo "::set-output name=last_commit_on_perforce::$(p4 changes -l -m 1 -s submitted ./...  | head -3 | tail -1 | sed -e "s/^.*\[ GIT INTEG \] //;s/ .*$//")"
 
-      # Get all unsynced commit since last good one
-      # If we never meet the last known commit on perforce we abort, that could mean there are more commits to into account
-      - name: Get all unsynced commit since last good one
-        run: |
-          sync_git_2_perforce.py \
-            --git_api_url ${{ github.api_url }} \
-            --git_repo ${{ github.repository }} \
-            --git_user ${{ github.actor }} \
-            --git_token ${{ secrets.GITHUB_TOKEN }} \
-            --interval_check "${{ env.DATE_MIN_CHECK_COMMITS }}" \
-            --perforce_last_commit ${{ steps.found_perforce_infos.outputs.last_commit_on_perforce }} \
-            --output_file ${{ env.COMMIT_LIST_FILE }} \
-            --current_commit ${{github.sha}}
+      # # Get all unsynced commit since last good one
+      # # If we never meet the last known commit on perforce we abort, that could mean there are more commits to into account
+      # - name: Get all unsynced commit since last good one
+      #   run: |
+      #     sync_git_2_perforce.py \
+      #       --git_api_url ${{ github.api_url }} \
+      #       --git_repo ${{ github.repository }} \
+      #       --git_user ${{ github.actor }} \
+      #       --git_token ${{ secrets.GITHUB_TOKEN }} \
+      #       --interval_check "${{ env.DATE_MIN_CHECK_COMMITS }}" \
+      #       --perforce_last_commit ${{ steps.found_perforce_infos.outputs.last_commit_on_perforce }} \
+      #       --output_file ${{ env.COMMIT_LIST_FILE }} \
+      #       --current_commit ${{github.sha}}
 
       # Create/Upgrade local git repo
       - uses: actions/checkout@v2
         with:
           path: ${{env.working-directory}}
           clean: 'false'
-      - name: Unshallow the git log, else we won't be able to checkout commits 
-        working-directory: ${{env.working-directory}}
-        run: git fetch --unshallow
+      # - name: Unshallow the git log, else we won't be able to checkout commits 
+      #   working-directory: ${{env.working-directory}}
+      #   run: git fetch --unshallow
 
-      ## For each commit found: get git files, p4 reconcile and submit
-      # If some file are still opened after submit, abort
-      - name: Upgrade perforce for each git commit found
-        working-directory: ${{env.working-directory}}
-        run: |
-          git config --global advice.detachedHead false
-          while read LINE
-          do
-            IFS='||'; arrIN=($LINE); unset IFS;
-            message="[ GIT INTEG ] ${arrIN[0]} - ${arrIN[2]}"
-            echo "---------------------------------"
-            echo "-- ${arrIN[0]} --"
-            echo "---------------------------------"
-            git checkout ${arrIN[0]}
-            #p4 status
-            p4 reconcile
-            opened_files_nb=$(p4 opened | wc -l)
-            #echo "OPENED : ${opened_files_nb}"
-            if [ ${opened_files_nb} -gt 0 ]
-            then 
-              p4 submit -d "${message}"
-              opened_files_nb=$(p4 opened | wc -l)
-              #echo "OPENED : ${opened_files_nb}"
-              if [ ${opened_files_nb} -gt 0 ]
-              then
-                echo "ABORTING, there are still opened files after p4 submit:"
-                p4 opened 
-                echo "REVERTING LAST CHANGES"
-                p4 revert ./...
-                exit 1
-              fi
-            fi
+      # ## For each commit found: get git files, p4 reconcile and submit
+      # # If some file are still opened after submit, abort
+      # - name: Upgrade perforce for each git commit found
+      #   working-directory: ${{env.working-directory}}
+      #   run: |
+      #     git config --global advice.detachedHead false
+      #     while read LINE
+      #     do
+      #       IFS='||'; arrIN=($LINE); unset IFS;
+      #       message="[ GIT INTEG ] ${arrIN[0]} - ${arrIN[2]}"
+      #       echo "---------------------------------"
+      #       echo "-- ${arrIN[0]} --"
+      #       echo "---------------------------------"
+      #       git checkout ${arrIN[0]}
+      #       #p4 status
+      #       p4 reconcile
+      #       opened_files_nb=$(p4 opened | wc -l)
+      #       #echo "OPENED : ${opened_files_nb}"
+      #       if [ ${opened_files_nb} -gt 0 ]
+      #       then 
+      #         p4 submit -d "${message}"
+      #         opened_files_nb=$(p4 opened | wc -l)
+      #         #echo "OPENED : ${opened_files_nb}"
+      #         if [ ${opened_files_nb} -gt 0 ]
+      #         then
+      #           echo "ABORTING, there are still opened files after p4 submit:"
+      #           p4 opened 
+      #           echo "REVERTING LAST CHANGES"
+      #           p4 revert ./...
+      #           exit 1
+      #         fi
+      #       fi
 
-          done < ${{ env.COMMIT_LIST_FILE }}
+      #     done < ${{ env.COMMIT_LIST_FILE }}
