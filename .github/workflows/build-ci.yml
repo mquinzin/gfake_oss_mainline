@@ -34,12 +34,14 @@ jobs:
         cond: ${{ github.base_ref == '' }}
         if_true: ${{github.ref_name}}
         if_false: ${{github.base_ref}}
-
     - name: Use conditional value
       run: |
         echo "working-directory=${{ steps.condval.outputs.value }}" >> $GITHUB_ENV
         ls -l $GITHUB_ENV
         cat $GITHUB_ENV        
+    - name: Create branch oriented WS directory
+      run: |
+        mkdir -p ${{env.working-directory}}
 
     - name: Clean local exe dir
       working-directory: ${{env.working-directory}}
