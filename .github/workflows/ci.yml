@@ -99,9 +99,9 @@ jobs:
         with:
           path: ${{env.working-directory}}
           clean: 'false'
-      # - name: Unshallow the git log, else we won't be able to checkout commits 
-      #   working-directory: ${{env.working-directory}}
-      #   run: git fetch --unshallow
+      - name: Unshallow the git log, else we won't be able to checkout commits 
+        working-directory: ${{env.working-directory}}
+        run: git fetch --unshallow
 
       # ## For each commit found: get git files, p4 reconcile and submit
       # # If some file are still opened after submit, abort
