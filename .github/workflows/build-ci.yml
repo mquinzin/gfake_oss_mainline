@@ -9,7 +9,8 @@ on:
   workflow_call:
     inputs:
       secrets:
-
+        token:
+          required: true
     
 jobs:
 
