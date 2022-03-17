@@ -19,6 +19,18 @@ jobs:
          - /etc/localtime:/etc/localtime:ro
 
     steps:
+      # Set the working dir suffixed with branch name
+      - uses: haya14busa/action-cond@v1
+        id: condval
+        with:
+          cond: ${{ github.base_ref == '' }}
+          if_true: ${{github.ref_name}}
+          if_false: ${{github.base_ref}}
+      - name: Use conditional value
+        run: |
+          echo "working-directory=${{ steps.condval.outputs.value }}" >> $GITHUB_ENV
+          cat $GITHUB_ENV
+
       - name: Run 1
         run: |
           export MADATE=`date`;
@@ -39,7 +51,7 @@ jobs:
       - name: Run 2
         run: |
           export MADATE=`date`;
-          echo "run job 2 at ${MADATE}"
+          echo "run job 2 at ${MADATE} (WS is ${{env.working-directory}})"
   # call_workflow_build:
   #   uses: ./.github/workflows/build-ci.yml
   #   secrets:
