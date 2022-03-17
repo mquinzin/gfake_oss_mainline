@@ -50,27 +50,27 @@ jobs:
       run: |
         mkdir -p ${{env.working-directory}}
 
-    - name: Clean local exe dir
-      working-directory: ${{env.working-directory}}
-      run: |
-        rm -rf exec
+    # - name: Clean local exe dir
+    #   working-directory: ${{env.working-directory}}
+    #   run: |
+    #     rm -rf exec
 
-    # Get last git modifications, don't clean before (way to keep persistent obj files)
-    - uses: actions/checkout@v2
-      with:
-        path: ${{env.working-directory}}
-        clean: 'false'
+    # # Get last git modifications, don't clean before (way to keep persistent obj files)
+    # - uses: actions/checkout@v2
+    #   with:
+    #     path: ${{env.working-directory}}
+    #     clean: 'false'
 
-    - name: Build binaries
-      working-directory: ${{env.working-directory}}
-      run: |
-        pwd
-        export mydate=`date`
-        echo >> check_cache.txt
-        echo "Starting ${{ matrix.build_number }} at $mydate" >> check_cache.txt
-        sleep 5
-        export mydate=`date`
-        echo "Ending ${{ matrix.build_number }} at $mydate" >> check_cache.txt
-        echo >> check_cache.txt
-        make ext=_${{ matrix.build_number }}-${{github.run_number}}
+    # - name: Build binaries
+    #   working-directory: ${{env.working-directory}}
+    #   run: |
+    #     pwd
+    #     export mydate=`date`
+    #     echo >> check_cache.txt
+    #     echo "Starting ${{ matrix.build_number }} at $mydate" >> check_cache.txt
+    #     sleep 5
+    #     export mydate=`date`
+    #     echo "Ending ${{ matrix.build_number }} at $mydate" >> check_cache.txt
+    #     echo >> check_cache.txt
+    #     make ext=_${{ matrix.build_number }}-${{github.run_number}}
         
