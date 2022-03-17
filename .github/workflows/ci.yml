@@ -8,20 +8,51 @@ on:
 
 jobs:
 
-  call_workflow_build:
-    uses: ./.github/workflows/build-ci.yml
-    secrets:
-      DOCKER_REGISTRY_USER: ${{secrets.DOCKER_REGISTRY_USER}}
-      DOCKER_REGISTRY_PASSWD: ${{secrets.DOCKER_REGISTRY_PASSWD}}
+  job1:
+    runs-on: [common,linux64]
+    container: 
+      image: fr-qafactorydev.europe.altair.com/common-linux64
+      credentials: 
+        username: ${{secrets.DOCKER_REGISTRY_USER}}
+        password: ${{secrets.DOCKER_REGISTRY_PASSWD}}
+      volumes: 
+         - /etc/localtime:/etc/localtime:ro
+
+    steps:
+      - name: Run 1
+        run: |
+          echo "run job 1"
+
+  job2:
+    needs: job1
+    runs-on: [common,linux64]
+    container: 
+      image: fr-qafactorydev.europe.altair.com/common-linux64
+      credentials: 
+        username: ${{secrets.DOCKER_REGISTRY_USER}}
+        password: ${{secrets.DOCKER_REGISTRY_PASSWD}}
+      volumes: 
+         - /etc/localtime:/etc/localtime:ro
+
+    steps:
+      - name: Run 2
+        run: |
+          echo "run job 2"
+
+  # call_workflow_build:
+  #   uses: ./.github/workflows/build-ci.yml
+  #   secrets:
+  #     DOCKER_REGISTRY_USER: ${{secrets.DOCKER_REGISTRY_USER}}
+  #     DOCKER_REGISTRY_PASSWD: ${{secrets.DOCKER_REGISTRY_PASSWD}}
 
 
 
-  call_workflow_sync:
-    needs: call_workflow_build
-    uses: ./.github/workflows/sync.yml
-    with:
-      working_directory: "LALALa"
-    secrets:
-      DOCKER_REGISTRY_USER: ${{secrets.DOCKER_REGISTRY_USER}}
-      DOCKER_REGISTRY_PASSWD: ${{secrets.DOCKER_REGISTRY_PASSWD}}
+  # call_workflow_sync:
+  #   needs: call_workflow_build
+  #   uses: ./.github/workflows/sync.yml
+  #   with:
+  #     working_directory: "LALALa"
+  #   secrets:
+  #     DOCKER_REGISTRY_USER: ${{secrets.DOCKER_REGISTRY_USER}}
+  #     DOCKER_REGISTRY_PASSWD: ${{secrets.DOCKER_REGISTRY_PASSWD}}
 
