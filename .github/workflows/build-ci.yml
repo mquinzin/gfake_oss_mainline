@@ -7,10 +7,9 @@ on:
   #     - main
 
   workflow_call:
-    inputs:
-      secrets:
-        DOCKER_REGISTRY_USER:
-          required: true
+    secrets:
+      DOCKER_REGISTRY_USER:
+        required: true
     
 jobs:
 
