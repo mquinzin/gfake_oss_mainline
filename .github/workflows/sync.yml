@@ -7,13 +7,16 @@ on:
   #     - main
 
   workflow_call:
+    inputs:
+      working_directory:
+        required: true
     secrets:
       DOCKER_REGISTRY_USER:
         required: true
       DOCKER_REGISTRY_PASSWD:
         required: true
 
-        
+
 # When pushing in main or merging pull request in main
 #  ${{github.base_ref}} : <empty>
 #  ${{github.ref_name}} : main 
@@ -42,20 +45,25 @@ jobs:
 
     steps:
 
-      # Set the working dir suffixed with branch name
-      - uses: haya14busa/action-cond@v1
-        id: condval
-        with:
-          cond: ${{ github.base_ref == '' }}
-          if_true: ${{github.ref_name}}
-          if_false: ${{github.base_ref}}
-      - name: Use conditional value
+      - name: Check env dir 
         run: |
-          echo "working-directory=${{ steps.condval.outputs.value }}" >> $GITHUB_ENV
+          echo "Env dir is ${{inputs.working_directory}}"
 
-      - name: Create branch oriented WS directory
-        run: |
-          mkdir -p ${{env.working-directory}}
+
+      # # Set the working dir suffixed with branch name
+      # - uses: haya14busa/action-cond@v1
+      #   id: condval
+      #   with:
+      #     cond: ${{ github.base_ref == '' }}
+      #     if_true: ${{github.ref_name}}
+      #     if_false: ${{github.base_ref}}
+      # - name: Use conditional value
+      #   run: |
+      #     echo "working-directory=${{ steps.condval.outputs.value }}" >> $GITHUB_ENV
+
+      # - name: Create branch oriented WS directory
+      #   run: |
+      #     mkdir -p ${{env.working-directory}}
 
       # # Create and update perforce WS, commercial files should not be present in this WS
       # - name: Create/Update perforce directory

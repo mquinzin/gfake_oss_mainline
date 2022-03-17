@@ -19,7 +19,9 @@ jobs:
   call_workflow_sync:
     needs: call_workflow_build
     uses: ./.github/workflows/sync.yml
+    inputs:
+      working_directory: "LALALa"
     secrets:
       DOCKER_REGISTRY_USER: ${{secrets.DOCKER_REGISTRY_USER}}
-      DOCKER_REGISTRY_PASSWD: ${{secrets.DOCKER_REGISTRY_PASSWD}}    
+      DOCKER_REGISTRY_PASSWD: ${{secrets.DOCKER_REGISTRY_PASSWD}}
 
