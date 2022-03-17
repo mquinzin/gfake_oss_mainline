@@ -34,7 +34,7 @@ jobs:
       - name: Run 1
         run: |
           export MADATE=`date`;
-          echo "run job 1 at ${MADATE}"
+          echo "run job 1 at ${MADATE} (WS is ${{env.working-directory}})"
 
   job2:
     needs: job1
