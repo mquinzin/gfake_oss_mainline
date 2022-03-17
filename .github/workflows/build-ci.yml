@@ -9,7 +9,7 @@ on:
   workflow_call:
     inputs:
       secrets:
-        token:
+        DOCKER_REGISTRY_USER:
           required: true
     
 jobs:
