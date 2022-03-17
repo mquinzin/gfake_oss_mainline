@@ -51,7 +51,7 @@ jobs:
       - name: Run 2
         run: |
           export MADATE=`date`;
-          echo "run job 2 at ${MADATE} (WS is ${{env.working-directory}})"
+          echo "run job 2 at ${MADATE} (WS is ${{job1.steps.condval.outputs.value}})"
   # call_workflow_build:
   #   uses: ./.github/workflows/build-ci.yml
   #   secrets:
