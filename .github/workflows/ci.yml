@@ -10,7 +10,7 @@ jobs:
 
   call_workflow_build:
     uses: ./.github/workflows/build-ci.yml
-    with:
+    secrets:
       DOCKER_REGISTRY_USER: ${{secrets.DOCKER_REGISTRY_USER}}
       DOCKER_REGISTRY_PASSWD: ${{secrets.DOCKER_REGISTRY_PASSWD}}
 
