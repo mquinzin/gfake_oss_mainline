@@ -9,5 +9,5 @@ on:
 jobs:
 
   call_workflow_build:
-    uses: mquinzin/gfake_oss_mainline/.github/workflows/build-ci.yml
+    uses: ./build-ci.yml
 
