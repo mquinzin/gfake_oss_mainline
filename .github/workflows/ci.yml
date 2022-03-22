@@ -79,6 +79,8 @@ jobs:
 
           export SCRIPT_OPT=''
 
+          # In case of first run we won't find last known commit so we force script 
+          # Variable RUN_FIRST_TIME must be set to run_1 at this precise moment
           if [ "$RUN_FIRST_TIME" == "run_1" ]
           then 
             SCRIPT_OPT='--force_sync'
@@ -186,21 +188,34 @@ jobs:
           # p4 sync
           echo -e "P4USER=$P4USER\nP4PORT=$P4PORT\nP4CLIENT=$P4CLIENT" > .p4config
 
-          # Getting the last known integrated commit
-          export LAST_KNOW_INTEG_COMMIT=`p4 changes -l -s submitted -m 1000 $P4REPOPERFORCE/... | grep "^\s*\[ GIT INTEG \]" | head -n 1 | sed -e "s/^.*\[ GIT INTEG \] //;s/ .*$//"`
-          export LAST_KNOW_INTEG_COMMIT_TRUNCATED=$(echo $LAST_KNOW_INTEG_COMMIT | cut -c -16)
 
-          # Getting all not integrated changelist (=all until last know commit)
-          if [ ! -z "$LAST_KNOW_INTEG_COMMIT_TRUNCATED" ]
-          then 
-            export SEARCH_OPT="| grep -B 10000 \"\[ GIT INTEG \]\s*$LAST_KNOW_INTEG_COMMIT_TRUNCATED\""
-            echo "Found LAST_KNOW_INTEG_COMMIT : $LAST_KNOW_INTEG_COMMIT"
+          # In case of first run we won't find last known integrated commit integrate everything
+          # Variable RUN_FIRST_TIME must be set to run_1 at this precise moment
+          if [ "$RUN_FIRST_TIME" == "run_1" ]
+          then
+            echo "Warning integrate all"
+            p4 integrate $P4REPOSYNCPERFORCE/... $P4REPOPERFORCE/...
+
+          else
+
+            # Getting the last known integrated commit
+            export LAST_KNOW_INTEG_COMMIT=`p4 changes -l -s submitted -m 1000 $P4REPOPERFORCE/... | grep "^\s*\[ GIT INTEG \]" | head -n 1 | sed -e "s/^.*\[ GIT INTEG \] //;s/ .*$//"`
+            export LAST_KNOW_INTEG_COMMIT_TRUNCATED=$(echo $LAST_KNOW_INTEG_COMMIT | cut -c -16)
+
+            # Getting all not integrated changelist (=all until last know commit)
+            if [ ! -z "$LAST_KNOW_INTEG_COMMIT_TRUNCATED" ]
+            then 
+              export SEARCH_OPT="| grep -B 10000 \"\[ GIT INTEG \]\s*$LAST_KNOW_INTEG_COMMIT_TRUNCATED\""
+              echo "Found LAST_KNOW_INTEG_COMMIT : $LAST_KNOW_INTEG_COMMIT"
+            fi
+
+            # For each opened
+            for changelist in `p4 changes -s submitted -m 1000 $P4REPOSYNCPERFORCE/... $SEARCH_OPT | awk -F' ' '{print $2}' | sort -n | head -n 1`
+            do 
+              echo "---------------------------------"
+              echo "-- $changelist --"
+              echo "---------------------------------"
+
+              echo "p4 integrate $P4REPOSYNCPERFORCE/...@$changelist,@$changelist $P4REPOPERFORCE/..."
+            done
           fi
-
-          # For each opened
-          for changelist in `p4 changes -s submitted -m 1000 $P4REPOSYNCPERFORCE/... $SEARCH_OPT | awk -F' ' '{print $2}' | sort -n`
-          do 
-            echo "---------------------------------"
-            echo "-- $changelist --"
-            echo "---------------------------------"
-          done
