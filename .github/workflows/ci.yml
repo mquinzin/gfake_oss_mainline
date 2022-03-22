@@ -79,7 +79,7 @@ jobs:
 
           export SCRIPT_OPT=''
 
-          if [ "$RUN_FIRST_TIME" == "run_1"]
+          if [ "$RUN_FIRST_TIME" == "run_1" ]
           then 
             SCRIPT_OPT='--force_sync'
           else
