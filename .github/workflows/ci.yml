@@ -28,7 +28,8 @@ jobs:
       P4PORT: ${{secrets.P4PORT}}
       P4USER: ${{secrets.P4USER}}
       P4PASSWD: ${{secrets.P4PASSWD}}
-      P4REPOSYNCPERFORCE: "//depot/Radioss/pfake_oss_mainline"
+      RUN_FIRST_TIME: ${{secrets.RUN_FIRST_TIME}}
+      P4REPOSYNCPERFORCE: "//depot/Radioss/pfake_oss_mainline3"
       P4REPOPERFORCE: "//depot/Radioss/pfake_oss_mainline_final"
       DATE_MIN_CHECK_COMMITS: "7 days ago"
       COMMIT_LIST_FILE: /tmp/commits_list
@@ -77,14 +78,19 @@ jobs:
           p4 sync
 
           export SCRIPT_OPT=''
-          export RET=`p4 changes -l -c $P4CLIENT -s submitted -m 1 | head -3 | tail -1 | grep "^\s*\[ GIT INTEG \]" | sed -e "s/^.*\[ GIT INTEG \] //;s/ .*$//"`; 
-          if [ -z $RET ]
+
+          if [ "$RUN_FIRST_TIME" == "run_1"]
           then 
-            SCRIPT_OPT=''
-            exit 1
-            echo "Could not find any commit reference in perforce submission, if the remote perforce WS is empty (creation), the SCRIPT_OPTION should be set to --force_sync  and exit 1 commented, and run once like this"
-          else 
-            SCRIPT_OPT="--perforce_last_commit $RET"; fi
+            SCRIPT_OPT='--force_sync'
+          else
+            export RET=`p4 changes -l -c $P4CLIENT -s submitted -m 1 | head -3 | tail -1 | grep "^\s*\[ GIT INTEG \]" | sed -e "s/^.*\[ GIT INTEG \] //;s/ .*$//"`; 
+            if [ -z $RET ]
+            then 
+              echo "Could not find any commit reference in perforce submission, if the remote perforce WS is empty (creation), set the RUN_FIRST_TIME secret variable to run_1"
+              exit 1
+            else 
+              SCRIPT_OPT="--perforce_last_commit $RET"; fi
+          fi
 
           echo "::set-output name=sync_option::$SCRIPT_OPT"
 
