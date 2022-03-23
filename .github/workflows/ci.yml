@@ -219,12 +219,7 @@ jobs:
             # Getting all not integrated changelist (=all until last know commit)
             if [ ! -z "$LAST_KNOW_INTEG_COMMIT_TRUNCATED" ]
             then 
-              #export SEARCH_OPT="\| grep -B 10000 'GIT INTEG.*\s*$LAST_KNOW_INTEG_COMMIT_TRUNCATED'"
-              # export SEARCH_OPT="| grep '$LAST_KNOW_INTEG_COMMIT_TRUNCATED'"
-              # echo "Found LAST_KNOW_INTEG_COMMIT : $LAST_KNOW_INTEG_COMMIT (trunc: $LAST_KNOW_INTEG_COMMIT_TRUNCATED)"
-              # echo "OPT : $SEARCH_OPT"
-
-              for changelist in `p4 changes -s submitted -m 1000 $P4REPOSYNCPERFORCE/... | grep -B 10000 "GIT INTEG.*\s*$LAST_KNOW_INTEG_COMMIT_TRUNCATED" | awk -F' ' '{print $2}' | sort -n | head -n-1`
+              for changelist in `p4 changes -s submitted -m 1000 $P4REPOSYNCPERFORCE/... | grep -B 10000 "GIT INTEG.*\s*$LAST_KNOW_INTEG_COMMIT_TRUNCATED" | head -n-1 | awk -F' ' '{print $2}' | sort -n`
               do 
                 echo "---------------------------------"
                 echo "-- $changelist --"
@@ -238,7 +233,7 @@ jobs:
             else 
               # Exit 1 not found LAST_KNOW_INTEG_COMMIT
               echo "Error cannot find a last known integrate commit in $P4REPOPERFORCE repository"
-
+              exit 1
             fi
 
           fi
