@@ -199,6 +199,16 @@ jobs:
             IFS='||'; arrIN=($LINE); unset IFS;
             message="[ GIT INTEG ] ${arrIN[0]} - ${arrIN[2]}"
             echo "p4 submit -d \"$message\""
+            return_value=1
+            if [ $return_value -eq 0 ]
+            then 
+              echo "Submit done"
+            else
+              echo "Error while submiting"
+              exit 1
+            fi
+            echo "ICICI"
+
             ### TO BE CONTINUED (submit + email)
 
           else
