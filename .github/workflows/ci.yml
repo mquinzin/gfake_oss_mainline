@@ -193,8 +193,10 @@ jobs:
           # Variable RUN_FIRST_TIME must be set to run_1 at this precise moment
           if [ "$RUN_FIRST_TIME" == "run_1" ]
           then
-            echo "Warning integrate all"
+            echo "/!\ Warning integrate all /!\"
             p4 integrate $P4REPOSYNCPERFORCE/... $P4REPOPERFORCE/...
+            cat /tmp/commits_list
+            ### TO BE CONTINUED (submit + email)
 
           else
 
@@ -217,5 +219,7 @@ jobs:
               echo "---------------------------------"
 
               echo "p4 integrate $P4REPOSYNCPERFORCE/...@$changelist,@$changelist $P4REPOPERFORCE/..."
+              ### TO BE CONTINUED (submit + email)
+
             done
           fi
