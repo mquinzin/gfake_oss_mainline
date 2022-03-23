@@ -229,17 +229,26 @@ jobs:
 
             # p4 changes -s submitted -m 1000 //depot/Radioss/pfake_oss_mainline3/... | grep -B 10000 'GIT INTEG.*\s*86e1ad3da7759593'
 
-            cmd="p4 changes -s submitted -m 1000 $P4REPOSYNCPERFORCE/... ${SEARCH_OPT}"
-            for changelist in `$cmd` 
-            # | awk -F' ' '{print $2}' | sort -n
-            #for changelist in `p4 changes -s submitted -m 1000 $P4REPOSYNCPERFORCE/... | grep '86e1ad3da7759593'`
-            do 
-              echo "---------------------------------"
-              echo "-- $changelist --"
-              echo "---------------------------------"
 
-              echo "p4 integrate $P4REPOSYNCPERFORCE/...@$changelist,@$changelist $P4REPOPERFORCE/..."
-              ### TO BE CONTINUED (submit + email)
+            p4 changes -s submitted -m 1000 $P4REPOSYNCPERFORCE/... ${SEARCH_OPT} > /tmp/testgrep
 
-            done
+            cat /tmp/testgrep
+
+            echo '-------------------'
+
+            # for changelist in `$cmd` 
+
+
+
+            # # | awk -F' ' '{print $2}' | sort -n
+            # #for changelist in `p4 changes -s submitted -m 1000 $P4REPOSYNCPERFORCE/... | grep '86e1ad3da7759593'`
+            # do 
+            #   echo "---------------------------------"
+            #   echo "-- $changelist --"
+            #   echo "---------------------------------"
+
+            #   echo "p4 integrate $P4REPOSYNCPERFORCE/...@$changelist,@$changelist $P4REPOPERFORCE/..."
+            #   ### TO BE CONTINUED (submit + email)
+
+            # done
           fi
