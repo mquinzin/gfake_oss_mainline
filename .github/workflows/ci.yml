@@ -220,7 +220,8 @@ jobs:
             if [ ! -z "$LAST_KNOW_INTEG_COMMIT_TRUNCATED" ]
             then 
               export SEARCH_OPT="| grep -B 10000 \"\[ GIT INTEG \]\s*$LAST_KNOW_INTEG_COMMIT_TRUNCATED\""
-              echo "Found LAST_KNOW_INTEG_COMMIT : $LAST_KNOW_INTEG_COMMIT"
+              echo "Found LAST_KNOW_INTEG_COMMIT : $LAST_KNOW_INTEG_COMMIT (trunc: LAST_KNOW_INTEG_COMMIT_TRUNCATED)"
+              echo "OPT : $SEARCH_OPT"
             fi
 
             # For each opened
