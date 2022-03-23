@@ -228,10 +228,10 @@ jobs:
             # For each opened
             pwd 
             p4 info
-            cmd="p4 changes -s submitted -m 1000 $P4REPOSYNCPERFORCE/... | grep '86e1ad3da7759593'"
+            cmd="p4 changes -s submitted -m 1000 $P4REPOSYNCPERFORCE/... \| grep '86e1ad3da7759593'"
             echo "RUNNING $cmd"
-            res=$($cmd)
-            echo "RES $res"
+            $cmd
+
             # p4 changes -s submitted -m 1000 //depot/Radioss/pfake_oss_mainline3/... | grep -B 10000 'GIT INTEG.*\s*86e1ad3da7759593'
             # for changelist in `p4 changes -s submitted -m 1000 $P4REPOSYNCPERFORCE/... $SEARCH_OPT | awk -F' ' '{print $2}' | sort -n`
             # for changelist in `$cmd`
