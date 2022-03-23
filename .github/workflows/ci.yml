@@ -219,7 +219,7 @@ jobs:
             # Getting all not integrated changelist (=all until last know commit)
             if [ ! -z "$LAST_KNOW_INTEG_COMMIT_TRUNCATED" ]
             then 
-              export SEARCH_OPT="| grep -B 10000 '[ GIT INTEG ]\s*$LAST_KNOW_INTEG_COMMIT_TRUNCATED'"
+              export SEARCH_OPT="| grep -B 10000 'GIT INTEG.*\s*$LAST_KNOW_INTEG_COMMIT_TRUNCATED'"
               echo "Found LAST_KNOW_INTEG_COMMIT : $LAST_KNOW_INTEG_COMMIT (trunc: $LAST_KNOW_INTEG_COMMIT_TRUNCATED)"
               echo "OPT : $SEARCH_OPT"
             fi
