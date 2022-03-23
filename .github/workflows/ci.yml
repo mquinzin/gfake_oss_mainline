@@ -237,7 +237,7 @@ jobs:
               echo "---------------------------------"
 
               echo "p4 integrate $P4REPOSYNCPERFORCE/...@$changelist,@$changelist $P4REPOPERFORCE/..."
-            #   ### TO BE CONTINUED (submit + email)
+              ### TO BE CONTINUED (submit + email)
 
-            # done
+            done
           fi
