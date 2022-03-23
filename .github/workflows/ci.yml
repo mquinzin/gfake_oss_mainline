@@ -151,7 +151,7 @@ jobs:
               then 
                 echo "Submit done"
               else
-                echo "Error while submiting"
+                echo "Error while submiting (commit ${arrIN[0]})"
                 ### TO BE CONTINUED (email)
                 exit 1
               fi
@@ -205,7 +205,7 @@ jobs:
             then 
               echo "Submit done"
             else
-              echo "Error while submiting"
+              echo "Error while submiting (1st run)"
               ### TO BE CONTINUED (email)
               exit 1
             fi
@@ -228,7 +228,16 @@ jobs:
                 p4 integrate $P4REPOSYNCPERFORCE/...@$changelist,@$changelist $P4REPOPERFORCE/...
                 p4 resolve -am
                 p4_description=`p4 -Ztag -F %Description% change -o $changelist`
-                echo "p4 submit -d \"$p4_description\""
+                p4 submit -d "$p4_description"
+                return_value=$?
+                if [ $return_value -eq 0 ]
+                then 
+                  echo "Submit done"
+                else
+                  echo "Error while submiting integration (CL $changelist)"
+                  ### TO BE CONTINUED (email) ???
+                  exit 1
+                fi                
                 ### TO BE CONTINUED (submit + email)
 
               done
