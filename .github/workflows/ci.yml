@@ -220,12 +220,15 @@ jobs:
             if [ ! -z "$LAST_KNOW_INTEG_COMMIT_TRUNCATED" ]
             then 
               #export SEARCH_OPT="\| grep -B 10000 'GIT INTEG.*\s*$LAST_KNOW_INTEG_COMMIT_TRUNCATED'"
-              export SEARCH_OPT="| grep '$LAST_KNOW_INTEG_COMMIT_TRUNCATED'"
-              echo "Found LAST_KNOW_INTEG_COMMIT : $LAST_KNOW_INTEG_COMMIT (trunc: $LAST_KNOW_INTEG_COMMIT_TRUNCATED)"
-              echo "OPT : $SEARCH_OPT"
+              # export SEARCH_OPT="| grep '$LAST_KNOW_INTEG_COMMIT_TRUNCATED'"
+              # echo "Found LAST_KNOW_INTEG_COMMIT : $LAST_KNOW_INTEG_COMMIT (trunc: $LAST_KNOW_INTEG_COMMIT_TRUNCATED)"
+              # echo "OPT : $SEARCH_OPT"
 
-              p4 changes -s submitted -m 1000 $P4REPOSYNCPERFORCE/... | grep '$LAST_KNOW_INTEG_COMMIT_TRUNCATED' > /tmp/testgrep
+              p4 changes -s submitted -m 1000 $P4REPOSYNCPERFORCE/... | grep "$LAST_KNOW_INTEG_COMMIT_TRUNCATED" > /tmp/testgrep
               cat /tmp/testgrep
+
+            else 
+              # Exit 1 not found LAST_KNOW_INTEG_COMMIT
 
             fi
 
