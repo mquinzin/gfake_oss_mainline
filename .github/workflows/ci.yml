@@ -224,38 +224,22 @@ jobs:
               # echo "Found LAST_KNOW_INTEG_COMMIT : $LAST_KNOW_INTEG_COMMIT (trunc: $LAST_KNOW_INTEG_COMMIT_TRUNCATED)"
               # echo "OPT : $SEARCH_OPT"
 
-              for changelist in `p4 changes -s submitted -m 1000 $P4REPOSYNCPERFORCE/... | grep -B 10000 "GIT INTEG.*\s*$LAST_KNOW_INTEG_COMMIT_TRUNCATED" | awk -F' ' '{print $2}' | sort -n`
+              #for changelist in `p4 changes -s submitted -m 1000 $P4REPOSYNCPERFORCE/... | grep -B 10000 "GIT INTEG.*\s*$LAST_KNOW_INTEG_COMMIT_TRUNCATED" | awk -F' ' '{print $2}' | sort -n`
+              for changelist in 90825
               do 
                 echo "---------------------------------"
                 echo "-- $changelist --"
                 echo "---------------------------------"
 
-                echo "p4 integrate $P4REPOSYNCPERFORCE/...@$changelist,@$changelist $P4REPOPERFORCE/..."
+                p4 integrate $P4REPOSYNCPERFORCE/...@$changelist,@$changelist $P4REPOPERFORCE/...
                 ### TO BE CONTINUED (submit + email)
 
               done
-
 
             else 
               # Exit 1 not found LAST_KNOW_INTEG_COMMIT
               echo "Error cannot find a last known integrate commit in $P4REPOPERFORCE repository"
 
             fi
-
-            # For each opened
-
-            # p4 changes -s submitted -m 1000 //depot/Radioss/pfake_oss_mainline3/... | grep -B 10000 'GIT INTEG.*\s*86e1ad3da7759593'
-
-
-
-            
-
-           #echo '-------------------'
-
-            # for changelist in `$cmd` 
-
-
-
-            # # | awk -F' ' '{print $2}' | sort -n
 
           fi
