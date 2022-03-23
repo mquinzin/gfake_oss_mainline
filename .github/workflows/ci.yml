@@ -226,22 +226,17 @@ jobs:
             fi
 
             # For each opened
-            pwd 
-            p4 info
-            echo $SHELL
-            cmd=`p4 changes -s submitted -m 1000 $P4REPOSYNCPERFORCE/... | grep '86e1ad3da7759593'`
-            echo $cmd
 
             # p4 changes -s submitted -m 1000 //depot/Radioss/pfake_oss_mainline3/... | grep -B 10000 'GIT INTEG.*\s*86e1ad3da7759593'
             # for changelist in `p4 changes -s submitted -m 1000 $P4REPOSYNCPERFORCE/... $SEARCH_OPT | awk -F' ' '{print $2}' | sort -n`
-            # for changelist in `$cmd`
-            # do 
-            #   echo "---------------------------------"
-            #   echo "-- $changelist --"
-            #   echo "---------------------------------"
+            for changelist in `p4 changes -s submitted -m 1000 $P4REPOSYNCPERFORCE/... | grep '86e1ad3da7759593'`
+            do 
+              echo "---------------------------------"
+              echo "-- $changelist --"
+              echo "---------------------------------"
 
-            #   echo "p4 integrate $P4REPOSYNCPERFORCE/...@$changelist,@$changelist $P4REPOPERFORCE/..."
-            #   ### TO BE CONTINUED (submit + email)
+              echo "p4 integrate $P4REPOSYNCPERFORCE/...@$changelist,@$changelist $P4REPOPERFORCE/..."
+              ### TO BE CONTINUED (submit + email)
 
-            # done
+            done
           fi
