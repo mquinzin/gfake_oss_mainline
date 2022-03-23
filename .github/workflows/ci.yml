@@ -226,6 +226,8 @@ jobs:
             fi
 
             # For each opened
+            pwd p4
+            info
             cmd="p4 changes -s submitted -m 1000 $P4REPOSYNCPERFORCE/... | grep '86e1ad3da7759593'"
             echo "RUNNING $cmd"
             res=$($cmd)
