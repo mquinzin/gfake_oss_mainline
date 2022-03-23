@@ -224,8 +224,17 @@ jobs:
               # echo "Found LAST_KNOW_INTEG_COMMIT : $LAST_KNOW_INTEG_COMMIT (trunc: $LAST_KNOW_INTEG_COMMIT_TRUNCATED)"
               # echo "OPT : $SEARCH_OPT"
 
-              p4 changes -s submitted -m 1000 $P4REPOSYNCPERFORCE/... | grep "$LAST_KNOW_INTEG_COMMIT_TRUNCATED" > /tmp/testgrep
-              cat /tmp/testgrep
+              for changelist in `p4 changes -s submitted -m 1000 $P4REPOSYNCPERFORCE/... | grep -B 10000 "GIT INTEG.*\s*$LAST_KNOW_INTEG_COMMIT_TRUNCATED" | awk -F' ' '{print $2}' | sort -n
+              do 
+                echo "---------------------------------"
+                echo "-- $changelist --"
+                echo "---------------------------------"
+
+                echo "p4 integrate $P4REPOSYNCPERFORCE/...@$changelist,@$changelist $P4REPOPERFORCE/..."
+                ### TO BE CONTINUED (submit + email)
+
+              done
+
 
             else 
               # Exit 1 not found LAST_KNOW_INTEG_COMMIT
@@ -241,21 +250,12 @@ jobs:
 
             
 
-            echo '-------------------'
+           #echo '-------------------'
 
             # for changelist in `$cmd` 
 
 
 
             # # | awk -F' ' '{print $2}' | sort -n
-            # #for changelist in `p4 changes -s submitted -m 1000 $P4REPOSYNCPERFORCE/... | grep '86e1ad3da7759593'`
-            # do 
-            #   echo "---------------------------------"
-            #   echo "-- $changelist --"
-            #   echo "---------------------------------"
 
-            #   echo "p4 integrate $P4REPOSYNCPERFORCE/...@$changelist,@$changelist $P4REPOPERFORCE/..."
-            #   ### TO BE CONTINUED (submit + email)
-
-            # done
           fi
