@@ -229,6 +229,7 @@ jobs:
 
             else 
               # Exit 1 not found LAST_KNOW_INTEG_COMMIT
+              echo "Error cannot find a last known integrate commit in $P4REPOPERFORCE repository"
 
             fi
 
