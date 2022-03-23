@@ -220,11 +220,12 @@ jobs:
             if [ ! -z "$LAST_KNOW_INTEG_COMMIT_TRUNCATED" ]
             then 
               export SEARCH_OPT="| grep -B 10000 \"\[ GIT INTEG \]\s*$LAST_KNOW_INTEG_COMMIT_TRUNCATED\""
-              echo "Found LAST_KNOW_INTEG_COMMIT : $LAST_KNOW_INTEG_COMMIT (trunc: LAST_KNOW_INTEG_COMMIT_TRUNCATED)"
+              echo "Found LAST_KNOW_INTEG_COMMIT : $LAST_KNOW_INTEG_COMMIT (trunc: $LAST_KNOW_INTEG_COMMIT_TRUNCATED)"
               echo "OPT : $SEARCH_OPT"
             fi
 
             # For each opened
+            echo "RUNNING for changelist in `p4 changes -s submitted -m 1000 $P4REPOSYNCPERFORCE/... $SEARCH_OPT | awk -F' ' '{print $2}' | sort -n`"
             for changelist in `p4 changes -s submitted -m 1000 $P4REPOSYNCPERFORCE/... $SEARCH_OPT | awk -F' ' '{print $2}' | sort -n`
             do 
               echo "---------------------------------"
