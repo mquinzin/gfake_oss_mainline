@@ -226,6 +226,9 @@ jobs:
                 echo "---------------------------------"
 
                 p4 integrate $P4REPOSYNCPERFORCE/...@$changelist,@$changelist $P4REPOPERFORCE/...
+                p4 resolve -am
+                p4_description=`p4 -Ztag -F %Description% change -o $changelist`
+                echo "p4 submit -d \"$p4_description\""
                 ### TO BE CONTINUED (submit + email)
 
               done
