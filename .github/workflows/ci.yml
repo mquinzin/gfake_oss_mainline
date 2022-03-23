@@ -224,7 +224,7 @@ jobs:
               # echo "Found LAST_KNOW_INTEG_COMMIT : $LAST_KNOW_INTEG_COMMIT (trunc: $LAST_KNOW_INTEG_COMMIT_TRUNCATED)"
               # echo "OPT : $SEARCH_OPT"
 
-              for changelist in `p4 changes -s submitted -m 1000 $P4REPOSYNCPERFORCE/... | grep -B 10000 "GIT INTEG.*\s*$LAST_KNOW_INTEG_COMMIT_TRUNCATED" | awk -F' ' '{print $2}' | sort -n
+              for changelist in `p4 changes -s submitted -m 1000 $P4REPOSYNCPERFORCE/... | grep -B 10000 "GIT INTEG.*\s*$LAST_KNOW_INTEG_COMMIT_TRUNCATED" | awk -F' ' '{print $2}' | sort -n`
               do 
                 echo "---------------------------------"
                 echo "-- $changelist --"
