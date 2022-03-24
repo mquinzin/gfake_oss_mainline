@@ -42,7 +42,11 @@ jobs:
       - name: Test return code
         run: |
           echo "MAVAR is $MAVAR"
-          ${{ env.MAVAR }}=15
+          echo "::set-env name=MAVAR::15"
+          echo "MAVAR is $MAVAR"
+
+      - name: Test return code 2
+        run: |
           echo "MAVAR is $MAVAR"
           ls unexisting_dir
           res=$?
