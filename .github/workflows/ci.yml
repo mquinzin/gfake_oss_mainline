@@ -35,23 +35,36 @@ jobs:
       COMMIT_LIST_FILE: /tmp/commits_list
       VERIF_PENDING_FILES: /tmp/verify_opened_changelists.txt
       INTEGRATE_WS: integrate_perforce
-      MAVAR: 0
+      STATUS_STEP1: 0
+      STATUS_STEP2: 0
+      STATUS_STEP3: 0
+      STATUS_STEP4: 0
 
     steps:
 
-      - name: Test return code
-        run: |
-          echo "MAVAR is $MAVAR"
-          echo "MAVAR=15" >> $GITHUB_ENV
-          echo "MAVAR is $MAVAR"
+      - name: Step1
+          ls /tmp
+          echo "STATUS_STEP1=1" >> $GITHUB_ENV
 
-      - name: Test return code 2
-        run: |
-          echo "MAVAR is $MAVAR"
-          ls unexisting_dir
-          res=$?
-          echo "AFTER message res is $res"
+      - name: Step2
+          ls /tmp
+          echo "STATUS_STEP2=1" >> $GITHUB_ENV
 
+      - name: Step3
+          ls /tmp/mm
+          echo "STATUS_STEP3=1" >> $GITHUB_ENV
+
+      - name: Step4
+          ls /tmp
+          echo "STATUS_STEP4=1" >> $GITHUB_ENV
+
+      - name: Managing step execution
+        if: ${{ always() }}
+        run: |
+          echo "STATUS_STEP1 : $STATUS_STEP1"
+          echo "STATUS_STEP2 : $STATUS_STEP2"
+          echo "STATUS_STEP3 : $STATUS_STEP3"
+          echo "STATUS_STEP4 : $STATUS_STEP4"
 
 
       # # Set the working dir suffixed with branch name
