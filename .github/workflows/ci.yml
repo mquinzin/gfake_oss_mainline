@@ -42,7 +42,7 @@ jobs:
       - name: Test return code
         run: |
           echo "MAVAR is $MAVAR"
-          echo "::set-env name=MAVAR::15"
+          echo "MAVAR=15" >> $GITHUB_ENV
           echo "MAVAR is $MAVAR"
 
       - name: Test return code 2
