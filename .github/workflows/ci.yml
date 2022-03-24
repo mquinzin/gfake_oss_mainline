@@ -304,10 +304,10 @@ jobs:
             echo "STATUS : $STATUS_STEP_SUBMIT_INTEGRATE_REPO"
             if [ "$STATUS_STEP_SUBMIT_INTEGRATE_REPO" == 0 ]
             then 
-              export P4CLIENT=$(echo "${{secrets.P4USER}}_${{ github.repository }}_integrate_perforce" | tr '/' '_')
               echo "  EMAIL MUST BE SENT"
-              echo "  MSG : $MSG_STEP_SUBMIT_INTEGRATE_REPO ($INFO_STEP_SUBMIT_INTEGRATE_REPO) P4CLIENT is $P4CLIENT"
+              echo "  MSG : $MSG_STEP_SUBMIT_INTEGRATE_REPO ($INFO_STEP_SUBMIT_INTEGRATE_REPO)"
 
+              export P4CLIENT=$(echo "${{secrets.P4USER}}_${{ github.repository }}_integrate_perforce" | tr '/' '_')
               echo "---------"
               p4 opened
               p4 changes -s pending -c $P4CLIENT
