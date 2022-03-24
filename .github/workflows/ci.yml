@@ -287,34 +287,40 @@ jobs:
       - name: Managing step execution
         if: ${{ always() }}
         run: |
-          #### STATUS_STEP_PERFORCE_LAST_KNOWN_GIT_COMMIT ###
+          echo -e "\n#### STATUS_STEP_PERFORCE_LAST_KNOWN_GIT_COMMIT ###"
           echo "STATUS : $STATUS_STEP_PERFORCE_LAST_KNOWN_GIT_COMMIT"
           if [ "$STATUS_STEP_PERFORCE_LAST_KNOWN_GIT_COMMIT" == 0 ]
           then 
-            echo "EMAIL MUST BE SENT"
-            echo "MSG : $MSG_STEP_PERFORCE_LAST_KNOWN_GIT_COMMIT"
+            echo "  EMAIL MUST BE SENT"
+            echo "  MSG : $MSG_STEP_PERFORCE_LAST_KNOWN_GIT_COMMIT"
+            exit 1
           fi
 
-          #### STATUS_STEP_SUBMIT_TMP_SYNC_REPO ###
+          echo -e "\n#### STATUS_STEP_SUBMIT_TMP_SYNC_REPO ###"
           echo "STATUS : $STATUS_STEP_SUBMIT_TMP_SYNC_REPO"
           if [ "$STATUS_STEP_SUBMIT_TMP_SYNC_REPO" == 0 ]
           then 
-            echo "EMAIL MUST BE SENT"
-            echo "MSG : $MSG_STEP_SUBMIT_TMP_SYNC_REPO ($INFO_STEP_SUBMIT_TMP_SYNC_REPO)"
+            echo "  EMAIL MUST BE SENT"
+            echo "  MSG : $MSG_STEP_SUBMIT_TMP_SYNC_REPO ($INFO_STEP_SUBMIT_TMP_SYNC_REPO)"
+            exit 1
           fi
 
-          #### STATUS_STEP_PERFORCE_LAST_KNOWN_INTEGRATED_COMMIT ###
+          echo -e "\n#### STATUS_STEP_PERFORCE_LAST_KNOWN_INTEGRATED_COMMIT ###"
           echo "STATUS : $STATUS_STEP_PERFORCE_LAST_KNOWN_INTEGRATED_COMMIT"
           if [ "$STATUS_STEP_PERFORCE_LAST_KNOWN_INTEGRATED_COMMIT" == 0 ]
           then 
-            echo "EMAIL MUST BE SENT"
-            echo "MSG : $MSG_STEP_PERFORCE_LAST_KNOWN_INTEGRATED_COMMIT"
+            echo "  EMAIL MUST BE SENT"
+            echo "  MSG : $MSG_STEP_PERFORCE_LAST_KNOWN_INTEGRATED_COMMIT"
+            exit 1
           fi
 
-          #### STATUS_STEP_SUBMIT_INTEGRATE_REPO ###
+          echo -e "\n"#### STATUS_STEP_SUBMIT_INTEGRATE_REPO ###"
           echo "STATUS : $STATUS_STEP_SUBMIT_INTEGRATE_REPO"
           if [ "$STATUS_STEP_SUBMIT_INTEGRATE_REPO" == 0 ]
           then 
-            echo "EMAIL MUST BE SENT"
-            echo "MSG : $MSG_STEP_SUBMIT_INTEGRATE_REPO ($INFO_STEP_SUBMIT_INTEGRATE_REPO)"
+            echo "  EMAIL MUST BE SENT"
+            echo "  MSG : $MSG_STEP_SUBMIT_INTEGRATE_REPO ($INFO_STEP_SUBMIT_INTEGRATE_REPO) P4CLIENT is $P4CLIENT"
+            # export P4CLIENT=$(echo "${{secrets.P4USER}}_${{ github.repository }}_integrate_perforce" | tr '/' '_')
+
+            exit 1
           fi
