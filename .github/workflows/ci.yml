@@ -261,70 +261,70 @@ jobs:
 
           fi
 
-      - name: Managing step execution
-        if: ${{ always() }}
-        run: |
-          CONTINUE=1
-          echo -e "\n#### STATUS_STEP_PERFORCE_LAST_KNOWN_GIT_COMMIT ###"
-          echo "STATUS : $STATUS_STEP_PERFORCE_LAST_KNOWN_GIT_COMMIT"
-          if [ "$STATUS_STEP_PERFORCE_LAST_KNOWN_GIT_COMMIT" == 0 ]
-          then
-            echo -e "[ \033[32;2;1mOK\033[0m ]" 
-            echo "  EMAIL MUST BE SENT"
-            echo "  MSG : $MSG_STEP_PERFORCE_LAST_KNOWN_GIT_COMMIT"
-            CONTINUE=0
-          else
-            echo -e "[ \033[31;2;1mFAILED\033[0m ]"
-          fi
+      # - name: Managing step execution
+      #   if: ${{ always() }}
+      #   run: |
+      #     CONTINUE=1
+      #     echo -e "\n#### STATUS_STEP_PERFORCE_LAST_KNOWN_GIT_COMMIT ###"
+      #     echo "STATUS : $STATUS_STEP_PERFORCE_LAST_KNOWN_GIT_COMMIT"
+      #     if [ "$STATUS_STEP_PERFORCE_LAST_KNOWN_GIT_COMMIT" == 0 ]
+      #     then
+      #       echo -e "[ \033[32;2;1mOK\033[0m ]" 
+      #       echo "  EMAIL MUST BE SENT"
+      #       echo "  MSG : $MSG_STEP_PERFORCE_LAST_KNOWN_GIT_COMMIT"
+      #       CONTINUE=0
+      #     else
+      #       echo -e "[ \033[31;2;1mFAILED\033[0m ]"
+      #     fi
 
-          if [ "$CONTINUE" == 1 ]
-          then
-            echo -e "\n#### STATUS_STEP_SUBMIT_TMP_SYNC_REPO ###"
-            echo "STATUS : $STATUS_STEP_SUBMIT_TMP_SYNC_REPO"
-            if [ "$STATUS_STEP_SUBMIT_TMP_SYNC_REPO" == 0 ]
-            then 
-              echo -e "[ \033[32;2;1mOK\033[0m ]" 
-              echo "  EMAIL MUST BE SENT"
-              echo "  MSG : $MSG_STEP_SUBMIT_TMP_SYNC_REPO ($INFO_STEP_SUBMIT_TMP_SYNC_REPO)"
-            CONTINUE=0
-            else
-              echo -e "[ \033[31;2;1mFAILED\033[0m ]"
-            fi
-          fi
+      #     if [ "$CONTINUE" == 1 ]
+      #     then
+      #       echo -e "\n#### STATUS_STEP_SUBMIT_TMP_SYNC_REPO ###"
+      #       echo "STATUS : $STATUS_STEP_SUBMIT_TMP_SYNC_REPO"
+      #       if [ "$STATUS_STEP_SUBMIT_TMP_SYNC_REPO" == 0 ]
+      #       then 
+      #         echo -e "[ \033[32;2;1mOK\033[0m ]" 
+      #         echo "  EMAIL MUST BE SENT"
+      #         echo "  MSG : $MSG_STEP_SUBMIT_TMP_SYNC_REPO ($INFO_STEP_SUBMIT_TMP_SYNC_REPO)"
+      #       CONTINUE=0
+      #       else
+      #         echo -e "[ \033[31;2;1mFAILED\033[0m ]"
+      #       fi
+      #     fi
 
-          if [ "$CONTINUE" == 1 ]
-          then
-            echo -e "\n#### STATUS_STEP_PERFORCE_LAST_KNOWN_INTEGRATED_COMMIT ###"
-            echo "STATUS : $STATUS_STEP_PERFORCE_LAST_KNOWN_INTEGRATED_COMMIT"
-            if [ "$STATUS_STEP_PERFORCE_LAST_KNOWN_INTEGRATED_COMMIT" == 0 ]
-            then 
-              echo -e "[ \033[32;2;1mOK\033[0m ]" 
-              echo "  EMAIL MUST BE SENT"
-              echo "  MSG : $MSG_STEP_PERFORCE_LAST_KNOWN_INTEGRATED_COMMIT"
-              CONTINUE=0
-            else
-              echo -e "[ \033[31;2;1mFAILED\033[0m ]"
-            fi
-          fi
+      #     if [ "$CONTINUE" == 1 ]
+      #     then
+      #       echo -e "\n#### STATUS_STEP_PERFORCE_LAST_KNOWN_INTEGRATED_COMMIT ###"
+      #       echo "STATUS : $STATUS_STEP_PERFORCE_LAST_KNOWN_INTEGRATED_COMMIT"
+      #       if [ "$STATUS_STEP_PERFORCE_LAST_KNOWN_INTEGRATED_COMMIT" == 0 ]
+      #       then 
+      #         echo -e "[ \033[32;2;1mOK\033[0m ]" 
+      #         echo "  EMAIL MUST BE SENT"
+      #         echo "  MSG : $MSG_STEP_PERFORCE_LAST_KNOWN_INTEGRATED_COMMIT"
+      #         CONTINUE=0
+      #       else
+      #         echo -e "[ \033[31;2;1mFAILED\033[0m ]"
+      #       fi
+      #     fi
 
-          if [ "$CONTINUE" == 1 ] 
-          then
-            echo -e "\n"#### STATUS_STEP_SUBMIT_INTEGRATE_REPO ###"
-            echo "STATUS : $STATUS_STEP_SUBMIT_INTEGRATE_REPO"
-            if [ "$STATUS_STEP_SUBMIT_INTEGRATE_REPO" == 0 ]
-            then 
-              echo -e "[ \033[32;2;1mOK\033[0m ]" 
-              echo "  EMAIL MUST BE SENT"
-              echo "  MSG : $MSG_STEP_SUBMIT_INTEGRATE_REPO ($INFO_STEP_SUBMIT_INTEGRATE_REPO)"
+      #     if [ "$CONTINUE" == 1 ] 
+      #     then
+      #       echo -e "\n"#### STATUS_STEP_SUBMIT_INTEGRATE_REPO ###"
+      #       echo "STATUS : $STATUS_STEP_SUBMIT_INTEGRATE_REPO"
+      #       if [ "$STATUS_STEP_SUBMIT_INTEGRATE_REPO" == 0 ]
+      #       then 
+      #         echo -e "[ \033[32;2;1mOK\033[0m ]" 
+      #         echo "  EMAIL MUST BE SENT"
+      #         echo "  MSG : $MSG_STEP_SUBMIT_INTEGRATE_REPO ($INFO_STEP_SUBMIT_INTEGRATE_REPO)"
 
-              export P4CLIENT=$(echo "${{secrets.P4USER}}_${{ github.repository }}_integrate_perforce" | tr '/' '_')
-              echo "---------"
-              p4 opened
-              p4 changes -s pending -c $P4CLIENT
-              echo "---------"
+      #         export P4CLIENT=$(echo "${{secrets.P4USER}}_${{ github.repository }}_integrate_perforce" | tr '/' '_')
+      #         echo "---------"
+      #         p4 opened
+      #         p4 changes -s pending -c $P4CLIENT
+      #         echo "---------"
 
-              CONTINUE=0
-            else
-              echo -e "[ \033[31;2;1mFAILED\033[0m ]"
-            fi
-          fi
+      #         CONTINUE=0
+      #       else
+      #         echo -e "[ \033[31;2;1mFAILED\033[0m ]"
+      #       fi
+      #     fi
