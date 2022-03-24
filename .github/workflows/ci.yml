@@ -35,11 +35,15 @@ jobs:
       COMMIT_LIST_FILE: /tmp/commits_list
       VERIF_PENDING_FILES: /tmp/verify_opened_changelists.txt
       INTEGRATE_WS: integrate_perforce
+      MAVAR: 0
 
     steps:
 
       - name: Test return code
         run: |
+          echo "MAVAR is $MAVAR"
+          ${{ env.MAVAR }}=15
+          echo "MAVAR is $MAVAR"
           ls unexisting_dir
           res=$?
           echo "AFTER message res is $res"
