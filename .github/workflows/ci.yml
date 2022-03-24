@@ -35,266 +35,286 @@ jobs:
       COMMIT_LIST_FILE: /tmp/commits_list
       VERIF_PENDING_FILES: /tmp/verify_opened_changelists.txt
       INTEGRATE_WS: integrate_perforce
-      STATUS_STEP1: 0
-      STATUS_STEP2: 0
-      STATUS_STEP3: 0
-      STATUS_STEP4: 0
+
+      STATUS_STEP_PERFORCE_LAST_KNOWN_GIT_COMMIT: 0
+      MSG_STEP_PERFORCE_LAST_KNOWN_GIT_COMMIT: "Could not find any commit reference in perforce temporary sync repository, if the remote perforce WS is empty (creation), you may set the RUN_FIRST_TIME secret variable to run_1"
+
+      STATUS_STEP_SUBMIT_TMP_SYNC_REPO: 0
+      INFO_STEP_SUBMIT_TMP_SYNC_REPO: ""
+      MSG_STEP_SUBMIT_TMP_SYNC_REPO: "Could not submit on perforce temporary sync repository"
+
+      STATUS_STEP_PERFORCE_LAST_KNOWN_INTEGRATED_COMMIT: 0
+      MSG_STEP_PERFORCE_LAST_KNOWN_INTEGRATED_COMMIT: "Could not find any commit reference in perforce integrate sync repository, if the remote perforce WS is empty (creation), you may set the RUN_FIRST_TIME secret variable to run_1"
+
+      STATUS_STEP_SUBMIT_INTEGRATE_REPO: 0
+      INFO_STEP_SUBMIT_INTEGRATE_REPO: ""
+      MSG_STEP_SUBMIT_INTEGRATE_REPO: "Could not submit on perforce integrate sync repository"
 
     steps:
 
-      - name: Step1
-        run: |
-          ls /tmp
-          echo "STATUS_STEP1=1" >> $GITHUB_ENV
+      # Set the working dir suffixed with branch name
+      - uses: haya14busa/action-cond@v1
+        id: set_workdir
+        with:
+          cond: ${{ github.base_ref == '' }}
+          if_true: ${{github.ref_name}}
+          if_false: ${{github.base_ref}}
 
-      - name: Step2
+      - name: Create branch oriented WS directory & integration WS
         run: |
-          ls /tmp
-          echo "STATUS_STEP2=1" >> $GITHUB_ENV
+          mkdir -p ${{ steps.set_workdir.outputs.value }} $INTEGRATE_WS
 
-      - name: Step3
+      # Create a WS to sync git changes on a temporary repo (sync_git_perforce)
+      - name: Create/Update sync_git_perforce workspace
+        working-directory: ${{ steps.set_workdir.outputs.value }}
+        id: perforce
         run: |
-          ls /tmp/mm
-          echo "STATUS_STEP3=1" >> $GITHUB_ENV
+          echo $P4PASSWD | p4 login
+          export P4CLIENT=$(echo "${{secrets.P4USER}}_${{ github.repository }}_sync_git_perforce" | tr '/' '_')
+          echo "P4CLIENT=$P4CLIENT" >> $GITHUB_ENV
+          if ! p4 client -o -t $P4CLIENT > /dev/null 2>&1; then 
+            echo "Creating workspace $P4CLIENT (1st time run)"
+            echo "
+          Client: $P4CLIENT
+          Owner:  servbot
+          Root:   $PWD
+          Options:        noallwrite noclobber nocompress unlocked nomodtime normdir
+          SubmitOptions:  submitunchanged
+          LineEnd:        local
+          View:
+            $P4REPOSYNCPERFORCE/... //$P4CLIENT/...
+            $P4REPOSYNCPERFORCE/C/... //$P4CLIENT/C/...
+            -$P4REPOSYNCPERFORCE/.git/... //$P4CLIENT/.git/...
+            -$P4REPOSYNCPERFORCE/.github/... //$P4CLIENT/.github/...
+            -$P4REPOSYNCPERFORCE/.p4config //$P4CLIENT/.p4config
+            " | p4 client -i;
+          fi
 
-      - name: Step4
+          p4 sync
+
+          export SCRIPT_OPT=''
+
+          # In case of first run we won't find last known commit so we force script 
+          # Variable RUN_FIRST_TIME must be set to run_1 at this precise moment
+          if [ "$RUN_FIRST_TIME" == "run_1" ]
+          then 
+            SCRIPT_OPT='--force_sync'
+          else
+            export RET=`p4 changes -l -c $P4CLIENT -s submitted -m 1 | head -3 | tail -1 | grep "^\s*\[ GIT INTEG \]" | sed -e "s/^.*\[ GIT INTEG \] //;s/ .*$//"`; 
+            if [ -z $RET ]
+            then 
+              exit 1
+            else 
+              SCRIPT_OPT="--perforce_last_commit $RET"; fi
+          fi
+
+          echo "::set-output name=sync_option::$SCRIPT_OPT"
+          echo -e "P4USER=$P4USER\nP4PORT=$P4PORT\nP4CLIENT=$P4CLIENT" > .p4config
+
+          # Set correct end of step status (if not an email will be sent)
+          echo "STATUS_STEP_PERFORCE_LAST_KNOWN_GIT_COMMIT=1" >> $GITHUB_ENV
+
+
+      # Get all unsynced commit since last good one
+      # If we never meet the last known commit on perforce we abort, that could mean there are more commits to into account
+      # At WS creation we use the dedicated --force_sync option to accept submiting event if perforce_last_commit has not been found
+      # so if this specific case fails, think to delete perforce client before re-running
+      - name: Get all unsynced commit since last good one
         run: |
-          ls /tmp
-          echo "STATUS_STEP4=1" >> $GITHUB_ENV
+          sync_git_2_perforce.py \
+            --git_api_url ${{ github.api_url }} \
+            --git_repo ${{ github.repository }} \
+            --git_user ${{ github.actor }} \
+            --git_token ${{ secrets.GITHUB_TOKEN }} \
+            --interval_check "${{ env.DATE_MIN_CHECK_COMMITS }}" \
+            --output_file ${{ env.COMMIT_LIST_FILE }} \
+            ${{ steps.perforce.outputs.sync_option }} \
+            --current_commit ${{github.sha}} 
+
+      # Create/Upgrade local git repo
+      - uses: actions/checkout@v2
+        with:
+          path: ${{ steps.set_workdir.outputs.value }}
+          clean: 'false'
+          lfs: 'true'
+      - name: Unshallow the git log, else we won't be able to checkout commits 
+        working-directory: ${{ steps.set_workdir.outputs.value }}
+        run: git fetch --unshallow
+
+      ## For each commit found: get git files, p4 reconcile and submit
+      # If some file are still opened after submit, abort
+      - name: Upgrade perforce for each git commit found
+        working-directory: ${{ steps.set_workdir.outputs.value }}
+        run: |
+          git config --global advice.detachedHead false
+          while read LINE
+          do
+            IFS='||'; arrIN=($LINE); unset IFS;
+            message="[ GIT INTEG ] ${arrIN[0]} - ${arrIN[2]}"
+            echo "---------------------------------"
+            echo "-- ${arrIN[0]} --"
+            echo "---------------------------------"
+            echo "INFO_STEP_SUBMIT_TMP_SYNC_REPO=${arrIN[0]}" >> $GITHUB_ENV
+            git checkout ${arrIN[0]}
+            #p4 status
+            p4 reconcile
+            opened_files_nb=$(p4 opened | wc -l)
+            #echo "OPENED : ${opened_files_nb}"
+            if [ ${opened_files_nb} -gt 0 ]
+            then 
+              p4 submit -d "${message}"
+            fi
+
+          done < ${{ env.COMMIT_LIST_FILE }}
+
+          # Set correct end of step status (if not an email will be sent)
+          echo "STATUS_STEP_SUBMIT_TMP_SYNC_REPO=1" >> $GITHUB_ENV
+
+
+      # Create a WS to integration (and merge on the fly) the temporary repo (sync_git_perforce) to the final destination
+      # Both views are declared
+      - name: Create/Update integrate workspace
+        working-directory: ${{ env.INTEGRATE_WS }}
+        run: |
+          echo $P4PASSWD | p4 login
+          export P4CLIENT=$(echo "${{secrets.P4USER}}_${{ github.repository }}_integrate_perforce" | tr '/' '_')
+          # echo "P4CLIENT=$P4CLIENT" >> $GITHUB_ENV
+          echo "P4CLIENT=$P4CLIENT"
+          pwd
+          if ! p4 client -o -t $P4CLIENT > /dev/null 2>&1; then 
+            echo "Creating workspace $P4CLIENT (1st time run)"
+            echo "
+          Client: $P4CLIENT
+          Owner:  servbot
+          Root:   $PWD
+          Options:        noallwrite noclobber nocompress unlocked nomodtime normdir
+          SubmitOptions:  submitunchanged
+          LineEnd:        local
+          View:
+            $P4REPOSYNCPERFORCE/... //$P4CLIENT/sync_perforce/...
+            $P4REPOPERFORCE/... //$P4CLIENT/dest_perforce/...
+            -$P4REPOPERFORCE/.p4config //$P4CLIENT/.p4config
+            " | p4 client -i;
+          fi
+
+          # p4 sync
+          echo -e "P4USER=$P4USER\nP4PORT=$P4PORT\nP4CLIENT=$P4CLIENT" > .p4config
+
+
+          # In case of first run we won't find last known integrated commit integrate everything
+          # Variable RUN_FIRST_TIME must be set to run_1 at this precise moment
+          if [ "$RUN_FIRST_TIME" == "run_1" ]
+          then
+            echo "/!\\ Warning integrate all /!\\"
+            p4 integrate $P4REPOSYNCPERFORCE/... $P4REPOPERFORCE/...
+            export LINE=$(tail -n 1 /tmp/commits_list)
+            IFS='||'; arrIN=($LINE); unset IFS;
+            message="[ GIT INTEG ] ${arrIN[0]} - ${arrIN[2]}"
+            p4 submit -d "$message"
+            return_value=$?
+            if [ $return_value -eq 0 ]
+            then 
+              echo "Submit done"
+            else
+              echo "Error while submiting (1st run)"
+              ### TO BE CONTINUED (email)
+              exit 1
+            fi
+
+          else
+
+            # Getting the last known integrated commit
+            export LAST_KNOW_INTEG_COMMIT=`p4 changes -l -s submitted -m 1000 $P4REPOPERFORCE/... | grep "^\s*\[ GIT INTEG \]" | head -n 1 | sed -e "s/^.*\[ GIT INTEG \] //;s/ .*$//"`
+            export LAST_KNOW_INTEG_COMMIT_TRUNCATED=$(echo $LAST_KNOW_INTEG_COMMIT | cut -c -16)
+
+            # Getting all not integrated changelist (=all until last know commit)
+            if [ ! -z "$LAST_KNOW_INTEG_COMMIT_TRUNCATED" ]
+            then 
+
+              # Set correct end of step status (if not an email will be sent)
+              echo "STATUS_STEP_PERFORCE_LAST_KNOWN_INTEGRATED_COMMIT=1" >> $GITHUB_ENV
+
+              for changelist in `p4 changes -s submitted -m 1000 $P4REPOSYNCPERFORCE/... | grep -B 10000 "GIT INTEG.*\s*$LAST_KNOW_INTEG_COMMIT_TRUNCATED" | head -n-1 | awk -F' ' '{print $2}' | sort -n`
+              do 
+                echo "---------------------------------"
+                echo "-- $changelist --"
+                echo "---------------------------------"
+
+                echo "INFO_STEP_SUBMIT_INTEGRATE_REPO=$changelist" >> $GITHUB_ENV
+
+                p4 integrate $P4REPOSYNCPERFORCE/...@$changelist,@$changelist $P4REPOPERFORCE/...
+                p4 resolve -am
+                p4_description=`p4 -Ztag -F %Description% change -o $changelist`
+                p4 submit -d "$p4_description"
+                submit_status=$?
+                if [ $submit_status -eq 0 ]
+                then 
+                  echo "Submit done"
+                else
+                  echo "Error while submiting integration (CL $changelist)"
+
+                  p4 opened > $VERIF_PENDING_FILES
+                  p4 changes -s pending -c $P4CLIENT >> $VERIF_PENDING_FILES
+
+                  echo "--- FILE $VERIF_PENDING_FILES ---"
+                  cat $VERIF_PENDING_FILES
+                  echo "---------------------------------"
+
+                  #### SEND EMAIL ####
+                  exit 1
+                fi                
+
+                ### If a merge is not done the sumbit won't work (submit_status > 0)
+                ### Test mus be done to now how to order merge checks submit verif .... ?
+                
+                ### TO BE CONTINUED (verif + email)
+                #### SEND EMAIL ####
+
+              done
+
+              # Set correct end of step status (if not an email will be sent)
+              echo "STATUS_STEP_SUBMIT_INTEGRATE_REPO=1" >> $GITHUB_ENV
+
+            else 
+              # Exit 1 not found LAST_KNOW_INTEG_COMMIT
+              echo "Error cannot find a last known integrate commit in $P4REPOPERFORCE repository"
+              #### SEND EMAIL ####
+              exit 1
+            fi
+
+          fi
 
       - name: Managing step execution
         if: ${{ always() }}
         run: |
-          echo "STATUS_STEP1 : $STATUS_STEP1"
-          echo "STATUS_STEP2 : $STATUS_STEP2"
-          echo "STATUS_STEP3 : $STATUS_STEP3"
-          echo "STATUS_STEP4 : $STATUS_STEP4"
+          #### STATUS_STEP_PERFORCE_LAST_KNOWN_GIT_COMMIT ###
+          echo "STATUS : $STATUS_STEP_PERFORCE_LAST_KNOWN_GIT_COMMIT"
+          if [ "$STATUS_STEP_PERFORCE_LAST_KNOWN_GIT_COMMIT" == 0 ]
+          then 
+            echo "EMAIL MUST BE SENT"
+            echo "MSG : $MSG_STEP_PERFORCE_LAST_KNOWN_GIT_COMMIT"
+          fi
 
+          #### STATUS_STEP_SUBMIT_TMP_SYNC_REPO ###
+          echo "STATUS : $STATUS_STEP_SUBMIT_TMP_SYNC_REPO"
+          if [ "$STATUS_STEP_SUBMIT_TMP_SYNC_REPO" == 0 ]
+          then 
+            echo "EMAIL MUST BE SENT"
+            echo "MSG : $MSG_STEP_SUBMIT_TMP_SYNC_REPO ($INFO_STEP_SUBMIT_TMP_SYNC_REPO)"
+          fi
 
-      # # Set the working dir suffixed with branch name
-      # - uses: haya14busa/action-cond@v1
-      #   id: set_workdir
-      #   with:
-      #     cond: ${{ github.base_ref == '' }}
-      #     if_true: ${{github.ref_name}}
-      #     if_false: ${{github.base_ref}}
+          #### STATUS_STEP_PERFORCE_LAST_KNOWN_INTEGRATED_COMMIT ###
+          echo "STATUS : $STATUS_STEP_PERFORCE_LAST_KNOWN_INTEGRATED_COMMIT"
+          if [ "$STATUS_STEP_PERFORCE_LAST_KNOWN_INTEGRATED_COMMIT" == 0 ]
+          then 
+            echo "EMAIL MUST BE SENT"
+            echo "MSG : $MSG_STEP_PERFORCE_LAST_KNOWN_INTEGRATED_COMMIT"
+          fi
 
-      # - name: Create branch oriented WS directory & integration WS
-      #   run: |
-      #     mkdir -p ${{ steps.set_workdir.outputs.value }} $INTEGRATE_WS
-
-      # # Create a WS to sync git changes on a temporary repo (sync_git_perforce)
-      # - name: Create/Update sync_git_perforce workspace
-      #   working-directory: ${{ steps.set_workdir.outputs.value }}
-      #   id: perforce
-      #   run: |
-      #     echo $P4PASSWD | p4 login
-      #     export P4CLIENT=$(echo "${{secrets.P4USER}}_${{ github.repository }}_sync_git_perforce" | tr '/' '_')
-      #     echo "P4CLIENT=$P4CLIENT" >> $GITHUB_ENV
-      #     if ! p4 client -o -t $P4CLIENT > /dev/null 2>&1; then 
-      #       echo "Creating workspace $P4CLIENT (1st time run)"
-      #       echo "
-      #     Client: $P4CLIENT
-      #     Owner:  servbot
-      #     Root:   $PWD
-      #     Options:        noallwrite noclobber nocompress unlocked nomodtime normdir
-      #     SubmitOptions:  submitunchanged
-      #     LineEnd:        local
-      #     View:
-      #       $P4REPOSYNCPERFORCE/... //$P4CLIENT/...
-      #       $P4REPOSYNCPERFORCE/C/... //$P4CLIENT/C/...
-      #       -$P4REPOSYNCPERFORCE/.git/... //$P4CLIENT/.git/...
-      #       -$P4REPOSYNCPERFORCE/.github/... //$P4CLIENT/.github/...
-      #       -$P4REPOSYNCPERFORCE/.p4config //$P4CLIENT/.p4config
-      #       " | p4 client -i;
-      #     fi
-
-      #     p4 sync
-
-      #     export SCRIPT_OPT=''
-
-      #     # In case of first run we won't find last known commit so we force script 
-      #     # Variable RUN_FIRST_TIME must be set to run_1 at this precise moment
-      #     if [ "$RUN_FIRST_TIME" == "run_1" ]
-      #     then 
-      #       SCRIPT_OPT='--force_sync'
-      #     else
-      #       export RET=`p4 changes -l -c $P4CLIENT -s submitted -m 1 | head -3 | tail -1 | grep "^\s*\[ GIT INTEG \]" | sed -e "s/^.*\[ GIT INTEG \] //;s/ .*$//"`; 
-      #       if [ -z $RET ]
-      #       then 
-      #         echo "Could not find any commit reference in perforce submission, if the remote perforce WS is empty (creation), set the RUN_FIRST_TIME secret variable to run_1"
-      #         exit 1
-      #         #### SEND EMAIL ####
-      #       else 
-      #         SCRIPT_OPT="--perforce_last_commit $RET"; fi
-      #     fi
-
-      #     echo "::set-output name=sync_option::$SCRIPT_OPT"
-
-      #     echo -e "P4USER=$P4USER\nP4PORT=$P4PORT\nP4CLIENT=$P4CLIENT" > .p4config
-
-
-      # # Get all unsynced commit since last good one
-      # # If we never meet the last known commit on perforce we abort, that could mean there are more commits to into account
-      # # At WS creation we use the dedicated --force_sync option to accept submiting event if perforce_last_commit has not been found
-      # # so if this specific case fails, think to delete perforce client before re-running
-      # - name: Get all unsynced commit since last good one
-      #   run: |
-      #     sync_git_2_perforce.py \
-      #       --git_api_url ${{ github.api_url }} \
-      #       --git_repo ${{ github.repository }} \
-      #       --git_user ${{ github.actor }} \
-      #       --git_token ${{ secrets.GITHUB_TOKEN }} \
-      #       --interval_check "${{ env.DATE_MIN_CHECK_COMMITS }}" \
-      #       --output_file ${{ env.COMMIT_LIST_FILE }} \
-      #       ${{ steps.perforce.outputs.sync_option }} \
-      #       --current_commit ${{github.sha}} 
-
-      # # Create/Upgrade local git repo
-      # - uses: actions/checkout@v2
-      #   with:
-      #     path: ${{ steps.set_workdir.outputs.value }}
-      #     clean: 'false'
-      #     lfs: 'true'
-      # - name: Unshallow the git log, else we won't be able to checkout commits 
-      #   working-directory: ${{ steps.set_workdir.outputs.value }}
-      #   run: git fetch --unshallow
-
-      # ## For each commit found: get git files, p4 reconcile and submit
-      # # If some file are still opened after submit, abort
-      # - name: Upgrade perforce for each git commit found
-      #   working-directory: ${{ steps.set_workdir.outputs.value }}
-      #   run: |
-      #     git config --global advice.detachedHead false
-      #     while read LINE
-      #     do
-      #       IFS='||'; arrIN=($LINE); unset IFS;
-      #       message="[ GIT INTEG ] ${arrIN[0]} - ${arrIN[2]}"
-      #       echo "---------------------------------"
-      #       echo "-- ${arrIN[0]} --"
-      #       echo "---------------------------------"
-      #       git checkout ${arrIN[0]}
-      #       #p4 status
-      #       p4 reconcile
-      #       opened_files_nb=$(p4 opened | wc -l)
-      #       #echo "OPENED : ${opened_files_nb}"
-      #       if [ ${opened_files_nb} -gt 0 ]
-      #       then 
-      #         p4 submit -d "${message}"
-      #         return_value=$?
-      #         if [ $return_value -eq 0 ]
-      #         then 
-      #           echo "Submit done"
-      #         else
-      #           echo "Error while submiting (commit ${arrIN[0]})"
-      #           #### SEND EMAIL ####
-      #           exit 1
-      #         fi
-      #       fi
-
-      #     done < ${{ env.COMMIT_LIST_FILE }}
-
-
-      # # Create a WS to integration (and merge on the fly) the temporary repo (sync_git_perforce) to the final destination
-      # # Both views are declared
-      # - name: Create/Update integrate workspace
-      #   working-directory: ${{ env.INTEGRATE_WS }}
-      #   run: |
-      #     echo $P4PASSWD | p4 login
-      #     export P4CLIENT=$(echo "${{secrets.P4USER}}_${{ github.repository }}_integrate_perforce" | tr '/' '_')
-      #     # echo "P4CLIENT=$P4CLIENT" >> $GITHUB_ENV
-      #     echo "P4CLIENT=$P4CLIENT"
-      #     pwd
-      #     if ! p4 client -o -t $P4CLIENT > /dev/null 2>&1; then 
-      #       echo "Creating workspace $P4CLIENT (1st time run)"
-      #       echo "
-      #     Client: $P4CLIENT
-      #     Owner:  servbot
-      #     Root:   $PWD
-      #     Options:        noallwrite noclobber nocompress unlocked nomodtime normdir
-      #     SubmitOptions:  submitunchanged
-      #     LineEnd:        local
-      #     View:
-      #       $P4REPOSYNCPERFORCE/... //$P4CLIENT/sync_perforce/...
-      #       $P4REPOPERFORCE/... //$P4CLIENT/dest_perforce/...
-      #       -$P4REPOPERFORCE/.p4config //$P4CLIENT/.p4config
-      #       " | p4 client -i;
-      #     fi
-
-      #     # p4 sync
-      #     echo -e "P4USER=$P4USER\nP4PORT=$P4PORT\nP4CLIENT=$P4CLIENT" > .p4config
-
-
-      #     # In case of first run we won't find last known integrated commit integrate everything
-      #     # Variable RUN_FIRST_TIME must be set to run_1 at this precise moment
-      #     if [ "$RUN_FIRST_TIME" == "run_1" ]
-      #     then
-      #       echo "/!\\ Warning integrate all /!\\"
-      #       p4 integrate $P4REPOSYNCPERFORCE/... $P4REPOPERFORCE/...
-      #       export LINE=$(tail -n 1 /tmp/commits_list)
-      #       IFS='||'; arrIN=($LINE); unset IFS;
-      #       message="[ GIT INTEG ] ${arrIN[0]} - ${arrIN[2]}"
-      #       p4 submit -d "$message"
-      #       return_value=$?
-      #       if [ $return_value -eq 0 ]
-      #       then 
-      #         echo "Submit done"
-      #       else
-      #         echo "Error while submiting (1st run)"
-      #         ### TO BE CONTINUED (email)
-      #         exit 1
-      #       fi
-
-      #     else
-
-      #       # Getting the last known integrated commit
-      #       export LAST_KNOW_INTEG_COMMIT=`p4 changes -l -s submitted -m 1000 $P4REPOPERFORCE/... | grep "^\s*\[ GIT INTEG \]" | head -n 1 | sed -e "s/^.*\[ GIT INTEG \] //;s/ .*$//"`
-      #       export LAST_KNOW_INTEG_COMMIT_TRUNCATED=$(echo $LAST_KNOW_INTEG_COMMIT | cut -c -16)
-
-      #       # Getting all not integrated changelist (=all until last know commit)
-      #       if [ ! -z "$LAST_KNOW_INTEG_COMMIT_TRUNCATED" ]
-      #       then 
-      #         for changelist in `p4 changes -s submitted -m 1000 $P4REPOSYNCPERFORCE/... | grep -B 10000 "GIT INTEG.*\s*$LAST_KNOW_INTEG_COMMIT_TRUNCATED" | head -n-1 | awk -F' ' '{print $2}' | sort -n`
-      #         do 
-      #           echo "---------------------------------"
-      #           echo "-- $changelist --"
-      #           echo "---------------------------------"
-
-      #           p4 integrate $P4REPOSYNCPERFORCE/...@$changelist,@$changelist $P4REPOPERFORCE/...
-      #           p4 resolve -am
-      #           p4_description=`p4 -Ztag -F %Description% change -o $changelist`
-      #           p4 submit -d "$p4_description"
-      #           submit_status=$?
-      #           if [ $submit_status -eq 0 ]
-      #           then 
-      #             echo "Submit done"
-      #           else
-      #             echo "Error while submiting integration (CL $changelist)"
-
-      #             p4 opened > $VERIF_PENDING_FILES
-      #             p4 changes -s pending -c $P4CLIENT >> $VERIF_PENDING_FILES
-
-      #             echo "--- FILE $VERIF_PENDING_FILES ---"
-      #             cat $VERIF_PENDING_FILES
-      #             echo "---------------------------------"
-
-      #             #### SEND EMAIL ####
-      #             exit 1
-      #           fi                
-
-      #           ### If a merge is not done the sumbit won't work (submit_status > 0)
-      #           ### Test mus be done to now how to order merge checks submit verif .... ?
-                
-      #           ### TO BE CONTINUED (verif + email)
-      #           #### SEND EMAIL ####
-
-      #         done
-
-      #       else 
-      #         # Exit 1 not found LAST_KNOW_INTEG_COMMIT
-      #         echo "Error cannot find a last known integrate commit in $P4REPOPERFORCE repository"
-      #         #### SEND EMAIL ####
-      #         exit 1
-      #       fi
-
-      #     fi
+          #### STATUS_STEP_SUBMIT_INTEGRATE_REPO ###
+          echo "STATUS : $STATUS_STEP_SUBMIT_INTEGRATE_REPO"
+          if [ "$STATUS_STEP_SUBMIT_INTEGRATE_REPO" == 0 ]
+          then 
+            echo "EMAIL MUST BE SENT"
+            echo "MSG : $MSG_STEP_SUBMIT_INTEGRATE_REPO ($INFO_STEP_SUBMIT_INTEGRATE_REPO)"
+          fi
