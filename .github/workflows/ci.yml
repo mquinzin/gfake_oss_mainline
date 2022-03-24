@@ -33,6 +33,7 @@ jobs:
       P4REPOPERFORCE: "//depot/Radioss/pfake_oss_mainline_final"
       DATE_MIN_CHECK_COMMITS: "7 days ago"
       COMMIT_LIST_FILE: /tmp/commits_list
+      VERIF_PENDING_FILES: /tmp/verify_opened_changelists.txt
       INTEGRATE_WS: integrate_perforce
 
     steps:
@@ -230,19 +231,29 @@ jobs:
                 p4 resolve -am
                 p4_description=`p4 -Ztag -F %Description% change -o $changelist`
                 p4 submit -d "$p4_description"
-                return_value=$?
-                if [ $return_value -eq 0 ]
+                submit_status=$?
+                if [ $submit_status -eq 0 ]
                 then 
                   echo "Submit done"
                 else
                   echo "Error while submiting integration (CL $changelist)"
+
+                  p4 opened > $VERIF_PENDING_FILES
+                  p4 changes -s pending -c $P4CLIENT >> $VERIF_PENDING_FILES
+
+                  echo "--- FILE $VERIF_PENDING_FILES ---"
+                  cat $VERIF_PENDING_FILES
+                  echo "---------------------------------"
+
                   #### SEND EMAIL ####
                   exit 1
                 fi                
 
-                ### If a merge is not done, what is the status of the submit ?
+                ### If a merge is not done the sumbit won't work (submit_status > 0)
                 ### Test mus be done to now how to order merge checks submit verif .... ?
+                
                 ### TO BE CONTINUED (verif + email)
+                #### SEND EMAIL ####
 
               done
 
