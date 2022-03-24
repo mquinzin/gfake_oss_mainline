@@ -43,18 +43,22 @@ jobs:
     steps:
 
       - name: Step1
+        run: |
           ls /tmp
           echo "STATUS_STEP1=1" >> $GITHUB_ENV
 
       - name: Step2
+        run: |
           ls /tmp
           echo "STATUS_STEP2=1" >> $GITHUB_ENV
 
       - name: Step3
+        run: |
           ls /tmp/mm
           echo "STATUS_STEP3=1" >> $GITHUB_ENV
 
       - name: Step4
+        run: |
           ls /tmp
           echo "STATUS_STEP4=1" >> $GITHUB_ENV
 
