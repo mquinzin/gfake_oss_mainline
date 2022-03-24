@@ -90,6 +90,7 @@ jobs:
             then 
               echo "Could not find any commit reference in perforce submission, if the remote perforce WS is empty (creation), set the RUN_FIRST_TIME secret variable to run_1"
               exit 1
+              #### SEND EMAIL ####
             else 
               SCRIPT_OPT="--perforce_last_commit $RET"; fi
           fi
@@ -152,7 +153,7 @@ jobs:
                 echo "Submit done"
               else
                 echo "Error while submiting (commit ${arrIN[0]})"
-                ### TO BE CONTINUED (email)
+                #### SEND EMAIL ####
                 exit 1
               fi
             fi
@@ -235,16 +236,20 @@ jobs:
                   echo "Submit done"
                 else
                   echo "Error while submiting integration (CL $changelist)"
-                  ### TO BE CONTINUED (email) ???
+                  #### SEND EMAIL ####
                   exit 1
                 fi                
-                ### TO BE CONTINUED (submit + email)
+
+                ### If a merge is not done, what is the status of the submit ?
+                ### Test mus be done to now how to order merge checks submit verif .... ?
+                ### TO BE CONTINUED (verif + email)
 
               done
 
             else 
               # Exit 1 not found LAST_KNOW_INTEG_COMMIT
               echo "Error cannot find a last known integrate commit in $P4REPOPERFORCE repository"
+              #### SEND EMAIL ####
               exit 1
             fi
 
