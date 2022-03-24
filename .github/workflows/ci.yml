@@ -307,7 +307,7 @@ jobs:
             fi
           fi
 
-          if [ "$CONTINUE" == 1 ]
+          if [ "$CONTINUE" == 1 ] 
           then
             echo -e "\n"#### STATUS_STEP_SUBMIT_INTEGRATE_REPO ###"
             echo "STATUS : $STATUS_STEP_SUBMIT_INTEGRATE_REPO"
