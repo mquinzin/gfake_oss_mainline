@@ -103,7 +103,9 @@ jobs:
           then 
             SCRIPT_OPT='--force_sync'
           else
-            export RET=`p4 changes -l -c $P4CLIENT -s submitted -m 1 | head -3 | tail -1 | grep "^\s*\[ GIT INTEG \]" | sed -e "s/^.*\[ GIT INTEG \] //;s/ .*$//"`; 
+            CL=`p4 changes -c $P4CLIENT -s submitted | grep "\[ GIT INTEG \]" | head -1 |awk -F' ' '{print $2}'`
+            RET=`p4 describe $CL | head -3 | tail -1 | sed -e "s/^.*\[ GIT INTEG \] //;s/ .*$//"`
+
             if [ -z $RET ] || [ "$RET" = "" ]
             then 
               exit 1
@@ -117,6 +119,7 @@ jobs:
           # Set correct end of step status (if not an email will be sent)
           echo "STATUS_STEP_PERFORCE_LAST_KNOWN_GIT_COMMIT=1" >> $GITHUB_ENV
 
+      #export RET=`p4 changes -l -c $P4CLIENT -s submitted -m 1 | head -3 | tail -1 | grep "^\s*\[ GIT INTEG \]" | sed -e "s/^.*\[ GIT INTEG \] //;s/ .*$//"`; 
 
       # Get all unsynced commit since last good one
       # If we never meet the last known commit on perforce we abort, that could mean there are more commits to into account
