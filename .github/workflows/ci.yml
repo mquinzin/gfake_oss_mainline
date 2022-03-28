@@ -50,6 +50,9 @@ jobs:
       INFO_STEP_SUBMIT_INTEGRATE_REPO: ""
       MSG_STEP_SUBMIT_INTEGRATE_REPO: "Could not submit on perforce integrate sync repository"
 
+      FROM_EMAIL: rdqa@altair.com
+      TO_EMAIL: mquinzin@altair.com
+
     steps:
 
       # Set the working dir suffixed with branch name
@@ -317,9 +320,15 @@ jobs:
               p4 opened
               p4 changes -s pending -c $P4CLIENT
               echo "---------"
-
               CONTINUE=0
             else
               echo -e "Status\t[ \033[32;2;1mOK\033[0m ]"
             fi
           fi
+
+          # Send email 
+          if [ "$CONTINUE" == 0 ] 
+          then
+            echo "MAILLSG" | Mail -r $FROM_EMAIL -s "Error in Github CI (${{github.sha}})" $TO_EMAIL
+          fi
+
