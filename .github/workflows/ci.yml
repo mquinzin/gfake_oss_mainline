@@ -101,7 +101,7 @@ jobs:
             SCRIPT_OPT='--force_sync'
           else
             export RET=`p4 changes -l -c $P4CLIENT -s submitted -m 1 | head -3 | tail -1 | grep "^\s*\[ GIT INTEG \]" | sed -e "s/^.*\[ GIT INTEG \] //;s/ .*$//"`; 
-            if [ -z $RET ] || [ "$RET" == "xx" ]
+            if [ -z $RET ] || [ "$RET" != "" ]
             then 
               exit 1
             else 
