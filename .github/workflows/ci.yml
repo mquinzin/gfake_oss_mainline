@@ -99,12 +99,12 @@ jobs:
 
           # In case of first run we won't find last known commit so we force script 
           # Variable RUN_FIRST_TIME must be set to run_1 at this precise moment
-          if [ "$RUN_FIRST_TIME" == "run_1" ]
+          if [ "$RUN_FIRST_TIME" = "run_1" ]
           then 
             SCRIPT_OPT='--force_sync'
           else
             export RET=`p4 changes -l -c $P4CLIENT -s submitted -m 1 | head -3 | tail -1 | grep "^\s*\[ GIT INTEG \]" | sed -e "s/^.*\[ GIT INTEG \] //;s/ .*$//"`; 
-            if [ -z $RET ] || [ "$RET" != "" ]
+            if [ -z $RET ] || [ "$RET" = "" ]
             then 
               exit 1
             else 
@@ -206,7 +206,7 @@ jobs:
 
           # In case of first run we won't find last known integrated commit integrate everything
           # Variable RUN_FIRST_TIME must be set to run_1 at this precise moment
-          if [ "$RUN_FIRST_TIME" == "run_1" ]
+          if [ "$RUN_FIRST_TIME" = "run_1" ]
           then
             echo "/!\\ Warning integrate all /!\\"
             p4 integrate $P4REPOSYNCPERFORCE/... $P4REPOPERFORCE/...
@@ -270,20 +270,19 @@ jobs:
           MAILMSG="Some error(s) has(ve) been raised during workflow execution:\n\n"
           CONTINUE=1
           echo -e "\n#### STATUS_STEP_PERFORCE_LAST_KNOWN_GIT_COMMIT ###"
-          if [ "$STATUS_STEP_PERFORCE_LAST_KNOWN_GIT_COMMIT" == 0 ]
+          if [ "$STATUS_STEP_PERFORCE_LAST_KNOWN_GIT_COMMIT" = 0 ]
           then
             echo -e "Status\t[ \033[31;2;1mFAILED\033[0m ]" 
-            echo "  MSG : $MSG_STEP_PERFORCE_LAST_KNOWN_GIT_COMMIT"
             MAILMSG+="$MSG_STEP_PERFORCE_LAST_KNOWN_GIT_COMMIT\n"
             CONTINUE=0
           else
             echo -e "Status\t[ \033[32;2;1mOK\033[0m ]"
           fi
 
-          if [ "$CONTINUE" == 1 ]
+          if [ "$CONTINUE" = 1 ]
           then
             echo -e "\n#### STATUS_STEP_SUBMIT_TMP_SYNC_REPO ###"
-            if [ "$STATUS_STEP_SUBMIT_TMP_SYNC_REPO" == 0 ]
+            if [ "$STATUS_STEP_SUBMIT_TMP_SYNC_REPO" = 0 ]
             then 
               echo -e "Status\t[ \033[31;2;1mFAILED\033[0m ]" 
               echo "  MSG : $MSG_STEP_SUBMIT_TMP_SYNC_REPO ($INFO_STEP_SUBMIT_TMP_SYNC_REPO)"
@@ -294,10 +293,10 @@ jobs:
             fi
           fi
 
-          if [ "$CONTINUE" == 1 ]
+          if [ "$CONTINUE" = 1 ]
           then
             echo -e "\n#### STATUS_STEP_PERFORCE_LAST_KNOWN_INTEGRATED_COMMIT ###"
-            if [ "$STATUS_STEP_PERFORCE_LAST_KNOWN_INTEGRATED_COMMIT" == 0 ]
+            if [ "$STATUS_STEP_PERFORCE_LAST_KNOWN_INTEGRATED_COMMIT" = 0 ]
             then 
               echo -e "Status\t[ \033[31;2;1mFAILED\033[0m ]" 
               echo "  MSG : $MSG_STEP_PERFORCE_LAST_KNOWN_INTEGRATED_COMMIT"
@@ -308,10 +307,10 @@ jobs:
             fi
           fi
 
-          if [ "$CONTINUE" == 1 ] 
+          if [ "$CONTINUE" = 1 ] 
           then
             echo -e "\n"#### STATUS_STEP_SUBMIT_INTEGRATE_REPO ###"
-            if [ "$STATUS_STEP_SUBMIT_INTEGRATE_REPO" == 0 ]
+            if [ "$STATUS_STEP_SUBMIT_INTEGRATE_REPO" = 0 ]
             then 
               echo -e "Status\t[ \033[31;2;1mFAILED\033[0m ]" 
               echo "  MSG : $MSG_STEP_SUBMIT_INTEGRATE_REPO ($INFO_STEP_SUBMIT_INTEGRATE_REPO)"
@@ -329,10 +328,18 @@ jobs:
           fi
 
           # Send email 
-          if [ "$CONTINUE" == 0 ] 
+          if [ "$CONTINUE" = 0 ] 
           then
+            # Setting SMTP server (docker host)
             DOCKER_HOST=`/sbin/ip route|awk '/default/ { print $3 }'`
             echo "set smtp=smtp://${DOCKER_HOST}:25" >> /etc/mail.rc 
+            
+            # Print message in log 
+            echo -e $MAILMSG
+
+            # Send email
             echo -e "$MAILMSG" | Mail -r $FROM_EMAIL -s "Error in Github CI (${{github.sha}})" $TO_EMAIL
+
+
           fi
 
