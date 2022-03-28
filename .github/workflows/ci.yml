@@ -161,7 +161,7 @@ jobs:
           do 
             echo "Removing old pending CL $cl"
             p4 change -d $cl
-          do
+          done
 
           while read LINE
           do
