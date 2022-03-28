@@ -300,7 +300,6 @@ jobs:
             if [ "$STATUS_STEP_PERFORCE_LAST_KNOWN_INTEGRATED_COMMIT" = 0 ]
             then 
               echo -e "Status\t[ \033[31;2;1mFAILED\033[0m ]" 
-              echo "  MSG : $MSG_STEP_PERFORCE_LAST_KNOWN_INTEGRATED_COMMIT"
               MAILMSG+="$MSG_STEP_PERFORCE_LAST_KNOWN_INTEGRATED_COMMIT\n"
               CONTINUE=0
             else
@@ -334,6 +333,9 @@ jobs:
             # Setting SMTP server (docker host)
             DOCKER_HOST=`/sbin/ip route|awk '/default/ { print $3 }'`
             echo "set smtp=smtp://${DOCKER_HOST}:25" >> /etc/mail.rc 
+
+            echo "DOCKER HOST is ${DOCKER_HOST}"
+            ip a
             
             # Print message in log 
             echo -e $MAILMSG
