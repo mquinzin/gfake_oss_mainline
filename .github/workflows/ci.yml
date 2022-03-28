@@ -268,12 +268,12 @@ jobs:
           echo "STATUS : $STATUS_STEP_PERFORCE_LAST_KNOWN_GIT_COMMIT"
           if [ "$STATUS_STEP_PERFORCE_LAST_KNOWN_GIT_COMMIT" == 0 ]
           then
-            echo -e "[ \033[32;2;1mOK\033[0m ]" 
+            echo -e "[ \033[31;2;1mFAILED\033[0m ]" 
             echo "  EMAIL MUST BE SENT"
             echo "  MSG : $MSG_STEP_PERFORCE_LAST_KNOWN_GIT_COMMIT"
             CONTINUE=0
           else
-            echo -e "[ \033[31;2;1mFAILED\033[0m ]"
+            echo -e "[ \033[32;2;1mOK\033[0m ]"
           fi
 
           if [ "$CONTINUE" == 1 ]
@@ -282,12 +282,12 @@ jobs:
             echo "STATUS : $STATUS_STEP_SUBMIT_TMP_SYNC_REPO"
             if [ "$STATUS_STEP_SUBMIT_TMP_SYNC_REPO" == 0 ]
             then 
-              echo -e "[ \033[32;2;1mOK\033[0m ]" 
+              echo -e "[ \033[31;2;1mFAILED\033[0m ]" 
               echo "  EMAIL MUST BE SENT"
               echo "  MSG : $MSG_STEP_SUBMIT_TMP_SYNC_REPO ($INFO_STEP_SUBMIT_TMP_SYNC_REPO)"
             CONTINUE=0
             else
-              echo -e "[ \033[31;2;1mFAILED\033[0m ]"
+              echo -e "[ \033[32;2;1mOK\033[0m ]"
             fi
           fi
 
@@ -297,12 +297,12 @@ jobs:
             echo "STATUS : $STATUS_STEP_PERFORCE_LAST_KNOWN_INTEGRATED_COMMIT"
             if [ "$STATUS_STEP_PERFORCE_LAST_KNOWN_INTEGRATED_COMMIT" == 0 ]
             then 
-              echo -e "[ \033[32;2;1mOK\033[0m ]" 
+              echo -e "[ \033[31;2;1mFAILED\033[0m ]" 
               echo "  EMAIL MUST BE SENT"
               echo "  MSG : $MSG_STEP_PERFORCE_LAST_KNOWN_INTEGRATED_COMMIT"
               CONTINUE=0
             else
-              echo -e "[ \033[31;2;1mFAILED\033[0m ]"
+              echo -e "[ \033[32;2;1mOK\033[0m ]"
             fi
           fi
 
@@ -312,7 +312,7 @@ jobs:
             echo "STATUS : $STATUS_STEP_SUBMIT_INTEGRATE_REPO"
             if [ "$STATUS_STEP_SUBMIT_INTEGRATE_REPO" == 0 ]
             then 
-              echo -e "[ \033[32;2;1mOK\033[0m ]" 
+              echo -e "[ \033[31;2;1mFAILED\033[0m ]" 
               echo "  EMAIL MUST BE SENT"
               echo "  MSG : $MSG_STEP_SUBMIT_INTEGRATE_REPO ($INFO_STEP_SUBMIT_INTEGRATE_REPO)"
 
@@ -324,6 +324,6 @@ jobs:
 
               CONTINUE=0
             else
-              echo -e "[ \033[31;2;1mFAILED\033[0m ]"
+              echo -e "[ \033[32;2;1mOK\033[0m ]"
             fi
           fi
