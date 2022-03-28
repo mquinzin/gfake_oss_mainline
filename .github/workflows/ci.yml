@@ -329,6 +329,8 @@ jobs:
           # Send email 
           if [ "$CONTINUE" == 0 ] 
           then
+            DOCKER_HOST=`/sbin/ip route|awk '/default/ { print $3 }'`
+            echo "set smtp=smtp://${DOCKER_HOST}:25" >> /etc/mail.rc 
             echo "MAILLSG" | Mail -r $FROM_EMAIL -s "Error in Github CI (${{github.sha}})" $TO_EMAIL
           fi
 
