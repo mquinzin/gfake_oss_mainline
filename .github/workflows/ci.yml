@@ -93,6 +93,14 @@ jobs:
             " | p4 client -i;
           fi
 
+          # Clean possible previous pending changelists 
+          p4 revert ./...
+          for cl in `p4 changes -c $P4CLIENT -s pending | grep "\[ GIT INTEG \]" | awk -F' ' '{print $2}' | sort -n`
+          do 
+            echo "Removing old pending CL $cl"
+            p4 change -d $cl
+          done
+
           p4 sync
 
           export SCRIPT_OPT=''
@@ -154,15 +162,6 @@ jobs:
         run: |
           git config --global advice.detachedHead false
 
-          # Clean possible previous pending changelists 
-          p4 revert ./...
-          export P4CLIENT=$(echo "${{secrets.P4USER}}_${{ github.repository }}_sync_git_perforce" | tr '/' '_')
-          for cl in `p4 changes -c $P4CLIENT -s pending | grep "\[ GIT INTEG \]" | awk -F' ' '{print $2}' | sort -n`
-          do 
-            echo "Removing old pending CL $cl"
-            p4 change -d $cl
-          done
-
           while read LINE
           do
             IFS='||'; arrIN=($LINE); unset IFS;
@@ -212,6 +211,14 @@ jobs:
             -$P4REPOPERFORCE/.p4config //$P4CLIENT/.p4config
             " | p4 client -i;
           fi
+
+          # Clean possible previous pending changelists 
+          p4 revert ./...
+          for CL in `p4 changes -c $P4CLIENT -s pending | grep "\[ GIT INTEG \]" | awk -F' ' '{print $2}' | sort -n`
+          do 
+            echo "Removing old pending CL $CL"
+            p4 change -d $CL
+          done
 
           # p4 sync
           echo -e "P4USER=$P4USER\nP4PORT=$P4PORT\nP4CLIENT=$P4CLIENT" > .p4config
