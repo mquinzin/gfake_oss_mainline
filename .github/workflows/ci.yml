@@ -230,7 +230,6 @@ jobs:
             export LAST_KNOW_INTEG_COMMIT=`p4 changes -l -s submitted -m 1000 $P4REPOPERFORCE/... | grep "^\s*\[ GIT INTEG \]" | head -n 1 | sed -e "s/^.*\[ GIT INTEG \] //;s/ .*$//"`
             export LAST_KNOW_INTEG_COMMIT_TRUNCATED=$(echo $LAST_KNOW_INTEG_COMMIT | cut -c -16)
 
-            unset LAST_KNOW_INTEG_COMMIT_TRUNCATED
             # Getting all not integrated changelist (=all until last know commit)
             if [ ! -z "$LAST_KNOW_INTEG_COMMIT_TRUNCATED" ]
             then 
@@ -334,9 +333,6 @@ jobs:
             DOCKER_HOST=`/sbin/ip route|awk '/default/ { print $3 }'`
             echo "set smtp=smtp://${DOCKER_HOST}:25" >> /etc/mail.rc 
 
-            echo "DOCKER HOST is ${DOCKER_HOST}"
-            ip a
-            
             # Print message in log 
             echo -e $MAILMSG
 
