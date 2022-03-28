@@ -266,13 +266,15 @@ jobs:
       - name: Managing step execution
         if: ${{ always() }}
         run: |
+
+          MAILMSG="Some error(s) has(ve) been raised during workflow execution:\n\n"
           CONTINUE=1
           echo -e "\n#### STATUS_STEP_PERFORCE_LAST_KNOWN_GIT_COMMIT ###"
           if [ "$STATUS_STEP_PERFORCE_LAST_KNOWN_GIT_COMMIT" == 0 ]
           then
             echo -e "Status\t[ \033[31;2;1mFAILED\033[0m ]" 
-            echo "  EMAIL MUST BE SENT"
             echo "  MSG : $MSG_STEP_PERFORCE_LAST_KNOWN_GIT_COMMIT"
+            MAILMSG="$MSG_STEP_PERFORCE_LAST_KNOWN_GIT_COMMIT\n"
             CONTINUE=0
           else
             echo -e "Status\t[ \033[32;2;1mOK\033[0m ]"
@@ -284,8 +286,8 @@ jobs:
             if [ "$STATUS_STEP_SUBMIT_TMP_SYNC_REPO" == 0 ]
             then 
               echo -e "Status\t[ \033[31;2;1mFAILED\033[0m ]" 
-              echo "  EMAIL MUST BE SENT"
               echo "  MSG : $MSG_STEP_SUBMIT_TMP_SYNC_REPO ($INFO_STEP_SUBMIT_TMP_SYNC_REPO)"
+              MAILMSG+="$MSG_STEP_SUBMIT_TMP_SYNC_REPO ($INFO_STEP_SUBMIT_TMP_SYNC_REPO)\n"
             CONTINUE=0
             else
               echo -e "Status\t[ \033[32;2;1mOK\033[0m ]"
@@ -298,8 +300,8 @@ jobs:
             if [ "$STATUS_STEP_PERFORCE_LAST_KNOWN_INTEGRATED_COMMIT" == 0 ]
             then 
               echo -e "Status\t[ \033[31;2;1mFAILED\033[0m ]" 
-              echo "  EMAIL MUST BE SENT"
               echo "  MSG : $MSG_STEP_PERFORCE_LAST_KNOWN_INTEGRATED_COMMIT"
+              MAILMSG+="$MSG_STEP_PERFORCE_LAST_KNOWN_INTEGRATED_COMMIT\n"
               CONTINUE=0
             else
               echo -e "Status\t[ \033[32;2;1mOK\033[0m ]"
@@ -312,7 +314,6 @@ jobs:
             if [ "$STATUS_STEP_SUBMIT_INTEGRATE_REPO" == 0 ]
             then 
               echo -e "Status\t[ \033[31;2;1mFAILED\033[0m ]" 
-              echo "  EMAIL MUST BE SENT"
               echo "  MSG : $MSG_STEP_SUBMIT_INTEGRATE_REPO ($INFO_STEP_SUBMIT_INTEGRATE_REPO)"
 
               export P4CLIENT=$(echo "${{secrets.P4USER}}_${{ github.repository }}_integrate_perforce" | tr '/' '_')
@@ -320,6 +321,7 @@ jobs:
               p4 opened
               p4 changes -s pending -c $P4CLIENT
               echo "---------"
+              MAILMSG+="$MSG_STEP_SUBMIT_INTEGRATE_REPO ($INFO_STEP_SUBMIT_INTEGRATE_REPO)\n"
               CONTINUE=0
             else
               echo -e "Status\t[ \033[32;2;1mOK\033[0m ]"
@@ -331,6 +333,6 @@ jobs:
           then
             DOCKER_HOST=`/sbin/ip route|awk '/default/ { print $3 }'`
             echo "set smtp=smtp://${DOCKER_HOST}:25" >> /etc/mail.rc 
-            echo "MAILLSG" | Mail -r $FROM_EMAIL -s "Error in Github CI (${{github.sha}})" $TO_EMAIL
+            echo -e "$MAILMSG" | Mail -r $FROM_EMAIL -s "Error in Github CI (${{github.sha}})" $TO_EMAIL
           fi
 
