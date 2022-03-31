@@ -63,7 +63,7 @@ jobs:
       - uses: octokit/request-action@v2.x
         id: commits_get_info
         with:
-          route: GET /repos/${{ github.repository }}/commits?since=${{ steps.env_variables.outputs.mindate }}
+          route: GET /repos/${{ github.repository }}/branches/main/protection/restrictions
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
