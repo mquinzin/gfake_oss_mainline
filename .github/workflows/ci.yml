@@ -173,7 +173,7 @@ jobs:
           lfs: 'true'
       - name: Unshallow the git log, else we won't be able to checkout commits 
         working-directory: ${{ steps.set_workdir.outputs.value }}
-        run: git fetch --unshallow
+        run: git fetch --unshallow 
 
       # ## For each commit found: get git files, p4 reconcile and submit
       # # If some file are still opened after submit, abort
