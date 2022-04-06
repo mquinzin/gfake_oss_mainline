@@ -55,34 +55,37 @@ jobs:
 
     steps:
 
-      - name: Provide env variables
-        id: env_variables
-        run: |
-          echo "::set-output name=mindate::$(date --date '${{ env.DATE_MIN_CHECK_COMMITS }}' +'%Y-%m-%dT%TZ')"
 
-      - uses: octokit/request-action@v2.x
-        id: commits_get_info
-        with:
-          route: GET /repos/${{ github.repository }}/branches/main/protection/restrictions
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: "Check result"
-        run: |
-          echo "close_branch : ${{ steps.commits_get_info.outputs.data }}"
+
+      # - name: Provide env variables
+      #   id: env_variables
+      #   run: |
+      #     echo "::set-output name=mindate::$(date --date '${{ env.DATE_MIN_CHECK_COMMITS }}' +'%Y-%m-%dT%TZ')"
+
+      # - uses: octokit/request-action@v2.x
+      #   id: commits_get_info
+      #   with:
+      #     route: GET /repos/${{ github.repository }}/branches/main/protection/restrictions
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # - name: "Check result"
+      #   run: |
+      #     echo "close_branch : ${{ steps.commits_get_info.outputs.data }}"
           
 
-      # # Set the working dir suffixed with branch name
-      # - uses: haya14busa/action-cond@v1
-      #   id: set_workdir
-      #   with:
-      #     cond: ${{ github.base_ref == '' }}
-      #     if_true: ${{github.ref_name}}
-      #     if_false: ${{github.base_ref}}
+      # Set the working dir suffixed with branch name
+      - uses: haya14busa/action-cond@v1
+        id: set_workdir
+        with:
+          cond: ${{ github.base_ref == '' }}
+          if_true: ${{github.ref_name}}
+          if_false: ${{github.base_ref}}
 
-      # - name: Create branch oriented WS directory & integration WS
-      #   run: |
-      #     mkdir -p ${{ steps.set_workdir.outputs.value }} $INTEGRATE_WS
+      - name: Create branch oriented WS directory & integration WS
+        run: |
+          mkdir -p ${{ steps.set_workdir.outputs.value }} $INTEGRATE_WS
 
       # # Create a WS to sync git changes on a temporary repo (sync_git_perforce)
       # - name: Create/Update sync_git_perforce workspace
@@ -162,15 +165,15 @@ jobs:
       #       ${{ steps.perforce.outputs.sync_option }} \
       #       --current_commit ${{github.sha}} 
 
-      # # Create/Upgrade local git repo
-      # - uses: actions/checkout@v2
-      #   with:
-      #     path: ${{ steps.set_workdir.outputs.value }}
-      #     clean: 'false'
-      #     lfs: 'true'
-      # - name: Unshallow the git log, else we won't be able to checkout commits 
-      #   working-directory: ${{ steps.set_workdir.outputs.value }}
-      #   run: git fetch --unshallow
+      # Create/Upgrade local git repo
+      - uses: actions/checkout@v2
+        with:
+          path: ${{ steps.set_workdir.outputs.value }}
+          clean: 'false'
+          lfs: 'true'
+      - name: Unshallow the git log, else we won't be able to checkout commits 
+        working-directory: ${{ steps.set_workdir.outputs.value }}
+        run: git fetch --unshallow
 
       # ## For each commit found: get git files, p4 reconcile and submit
       # # If some file are still opened after submit, abort
